@@ -1,7 +1,7 @@
-From 336de8422bdf6c4662ab02bfc2dd5f7f19f92ff6 Mon Sep 17 00:00:00 2001
+From 34b2c5f4d3a345fe81f0ca15630f2c1def2a9a0a Mon Sep 17 00:00:00 2001
 From: Fedora Kernel Team <kernel-team@fedoraproject.org>
-Date: Wed, 16 Mar 2016 22:35:06 -0400
-Subject: [PATCH] pf-kernel 4.4-pf8
+Date: Sat, 19 Mar 2016 22:32:22 -0400
+Subject: [PATCH] pf-kernel 4.4-pf9
 
 ---
  Documentation/kernel-parameters.txt        |    3 +
@@ -2247,17 +2247,17 @@ index d826f1b..91b2818 100644
  M:	Dario Ballabio <ballabio_dario@emc.com>
  L:	linux-scsi@vger.kernel.org
 diff --git a/Makefile b/Makefile
-index 3f33999..a852eb8 100644
+index c7717d8..7ae8094 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,8 +1,8 @@
  VERSION = 4
  PATCHLEVEL = 4
--SUBLEVEL = 5
+-SUBLEVEL = 6
 -EXTRAVERSION =
 -NAME = Blurry Fish Butt
 +SUBLEVEL = 0
-+EXTRAVERSION = -pf8
++EXTRAVERSION = -pf9
 +NAME = Forbidden Moderators Discussing
  
  # *DOCUMENTATION*
@@ -11691,7 +11691,7 @@ index 14b0ff3..776b5a0 100644
  
  static inline unsigned long my_zero_pfn(unsigned long addr)
 diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 79cfaee..85b440c 100644
+index fbe47bc..d5d2473 100644
 --- a/include/linux/bio.h
 +++ b/include/linux/bio.h
 @@ -32,6 +32,8 @@

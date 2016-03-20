@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define buildid .pf8
+%define buildid .pf9
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -655,7 +655,7 @@ Patch677: digi_acceleport-do-sanity-checking-for-the-number-of.patch
 Patch678: ims-pcu-sanity-check-against-missing-interfaces.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.4-pf8.patch
+Patch999: pf-kernel-4.4-pf9.patch
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -2100,6 +2100,9 @@ fi
 #
 # 
 %changelog
+* Sun Mar 20 2016 Luke Street - 4.4.6-301.pf9
+- Disable debugging options.
+
 * Fri Mar 18 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - ims-pcu: sanity checking on missing interfaces
 - CVE-2016-3140 digi_acceleport: oops on invalid USB descriptors (rhbz 1317010 1316995)
