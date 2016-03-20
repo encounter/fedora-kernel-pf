@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-# define buildid .local
+%define buildid .pf8
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -633,6 +633,9 @@ Patch664: netfilter-x_tables-check-for-size-overflow.patch
 
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
+
+#pf-kernel
+Patch999: pf-kernel-4.4-pf8.patch
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -2077,6 +2080,9 @@ fi
 #
 # 
 %changelog
+* Thu Mar 17 2016 Luke Street - 4.4.5-301.local
+- Disable debugging options.
+
 * Mon Mar 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - CVE-2016-3134 netfilter: missing bounds check in ipt_entry struct (rhbz 1317383 1317384)
 - CVE-2016-3135 netfilter: size overflow in x_tables (rhbz 1317386 1317387)
