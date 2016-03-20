@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -603,10 +603,6 @@ Patch640: PNP-Add-Haswell-ULT-to-Intel-MCH-size-workaround.patch
 #rhbz 1278942
 Patch643: media-ivtv-avoid-going-past-input-audio-array.patch
 
-#rhbz 1302037
-Patch644: wext-fix-message-delay-ordering.patch
-Patch645: cfg80211-wext-fix-message-ordering.patch
-
 #rhbz 1255325
 Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 
@@ -619,9 +615,6 @@ Patch659: pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
 #rhbz 1310252 1313318
 Patch660: 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
 
-#Fix for known arm64 breakage. No bugzilla becuase proactivity \o/
-Patch661: 0001-arm64-account-for-sparsemem-section-alignment-when-c.patch
-
 #rhbz 1316719
 Patch662: 0001-cdc-acm-fix-NULL-pointer-reference.patch
 
@@ -633,6 +626,33 @@ Patch664: netfilter-x_tables-check-for-size-overflow.patch
 
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
+
+#CVE-2016-3135 rhbz 1318172 1318270
+Patch666: ipv4-Dont-do-expensive-useless-work-during-inetdev-des.patch
+
+#CVE-2016-2184 rhbz 1317012 1317470
+Patch670: ALSA-usb-audio-Fix-NULL-dereference-in-create_fixed_.patch
+Patch671: ALSA-usb-audio-Add-sanity-checks-for-endpoint-access.patch
+
+#CVE-2016-3137 rhbz 1317010 1316996
+Patch672: cypress_m8-add-sanity-checking.patch
+
+#CVE-2016-2186 rhbz 1317015 1317464
+Patch673: USB-input-powermate-fix-oops-with-malicious-USB-desc.patch
+
+#CVE-2016-2188 rhbz 1317018 1317467
+Patch674: USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
+
+#CVE-2016-2185 rhbz 1317014 1317471
+Patch675: usb_driver_claim_interface-add-sanity-checking.patch
+
+#CVE-2016-3138 rhbz 1317010 1316204
+Patch676: cdc-acm-more-sanity-checking.patch
+
+#CVE-2016-3140 rhbz 1317010 1316995
+Patch677: digi_acceleport-do-sanity-checking-for-the-number-of.patch
+
+Patch678: ims-pcu-sanity-check-against-missing-interfaces.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.4-pf8.patch
@@ -2080,8 +2100,24 @@ fi
 #
 # 
 %changelog
-* Thu Mar 17 2016 Luke Street - 4.4.5-301.local
-- Disable debugging options.
+* Fri Mar 18 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- ims-pcu: sanity checking on missing interfaces
+- CVE-2016-3140 digi_acceleport: oops on invalid USB descriptors (rhbz 1317010 1316995)
+- CVE-2016-3138 cdc_acm: oops on invalid USB descriptors (rhbz 1317010 1316204)
+- CVE-2016-2185 ati_remote2: oops on invalid USB descriptors (rhbz 1317014 1317471)
+- CVE-2016-2188 iowarrior: oops on invalid USB descriptors (rhbz 1317018 1317467)
+- CVE-2016-2186 powermate: oops on invalid USB descriptors (rhbz 1317015 1317464)
+- CVE-2016-3137 cypress_m8: oops on invalid USB descriptors (rhbz 1317010 1316996)
+- CVE-2016-2184 alsa: panic on invalid USB descriptors (rhbz 1317012 1317470)
+
+* Wed Mar 16 2016 Laura Abbott <labbott@redhat.com> - 4.4.6-300
+- Linux v4.4.6
+
+* Wed Mar 16 2016 Laura Abbott <labbott@redhat.com>
+- Revert patch causing radeon breakage (rhbz 1317300 1317179)
+
+* Wed Mar 16 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3135 ipv4: DoS when destroying a network interface (rhbz 1318172 1318270)
 
 * Mon Mar 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - CVE-2016-3134 netfilter: missing bounds check in ipt_entry struct (rhbz 1317383 1317384)
