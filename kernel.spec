@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 303
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -645,6 +645,7 @@ Patch674: USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
 
 #CVE-2016-2185 rhbz 1317014 1317471
 Patch675: usb_driver_claim_interface-add-sanity-checking.patch
+Patch669: Input-ati_remote2-fix-crashes-on-detecting-device-wi.patch
 
 #CVE-2016-3138 rhbz 1317010 1316204
 Patch676: cdc-acm-more-sanity-checking.patch
@@ -662,6 +663,15 @@ Patch680: thermal-fix.patch
 
 #rhbz 1318079
 Patch681: 0001-Input-synaptics-handle-spurious-release-of-trackstic.patch
+
+#CVE-2016-2187 rhbz 1317017 1317010
+Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
+
+#CVE-2016-3136 rhbz 1317007 1317010
+Patch687: mct_u232-sanity-checking-in-probe.patch
+
+#rhbz 1295646
+Patch688: 09-29-drm-udl-Use-unlocked-gem-unreferencing.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.4-pf9.patch
@@ -2109,6 +2119,13 @@ fi
 #
 # 
 %changelog
+* Wed Mar 23 2016 Laura Abbott <labbott@fedoraproject.org>
+- drm/udl: Use unlocked gem unreferencing (rhbz 1295646)
+
+* Tue Mar 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3136 mct_u232: oops on invalid USB descriptors (rhbz 1317007 1317010)
+- CVE-2016-2187 gtco: oops on invalid USB descriptors (rhbz 1317017 1317010)
+
 * Mon Mar 21 2016 Laura Abbott <labbott@fedoraproject.org>
 - uas: Limit qdepth at the scsi-host level (rhbz 1315013)
 - Fix for performance regression caused by thermal (rhbz 1317190)
