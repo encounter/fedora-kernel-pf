@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 303
+%global baserelease 304
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -633,6 +633,8 @@ Patch666: ipv4-Dont-do-expensive-useless-work-during-inetdev-des.patch
 #CVE-2016-2184 rhbz 1317012 1317470
 Patch670: ALSA-usb-audio-Fix-NULL-dereference-in-create_fixed_.patch
 Patch671: ALSA-usb-audio-Add-sanity-checks-for-endpoint-access.patch
+Patch667: ALSA-usb-audio-Minor-code-cleanup-in-create_fixed_st.patch
+Patch668: ALSA-usb-audio-Fix-double-free-in-error-paths-after-.patch
 
 #CVE-2016-3137 rhbz 1317010 1316996
 Patch672: cypress_m8-add-sanity-checking.patch
@@ -672,6 +674,9 @@ Patch687: mct_u232-sanity-checking-in-probe.patch
 
 #rhbz 1295646
 Patch688: 09-29-drm-udl-Use-unlocked-gem-unreferencing.patch
+
+# CVE-2016-3157 rhbz 1315711 1321948
+Patch689: x86-iopl-64-Properly-context-switch-IOPL-on-Xen-PV.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.4-pf9.patch
@@ -2119,6 +2124,15 @@ fi
 #
 # 
 %changelog
+* Thu Mar 31 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add two more patches for CVE-2016-2184
+
+* Wed Mar 30 2016 Laura Abbott <labbott@redhat.com> - 4.4.6-301
+- Bump and build
+
+* Tue Mar 29 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3157 xen: priv escalation on 64bit PV domains with io port access (rhbz 1315711 1321948)
+
 * Wed Mar 23 2016 Laura Abbott <labbott@fedoraproject.org>
 - drm/udl: Use unlocked gem unreferencing (rhbz 1295646)
 
