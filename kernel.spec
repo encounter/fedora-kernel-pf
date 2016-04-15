@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -656,7 +656,7 @@ Patch697: HID-wacom-fix-Bamboo-ONE-oops.patch
 Patch698: 0001-ACPI-processor-Request-native-thermal-interrupt-hand.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.4-pf9.patch
+Patch999: pf-kernel-4.4-pf10.patch
 
 # END OF PATCH DEFINITIONS
 %endif
