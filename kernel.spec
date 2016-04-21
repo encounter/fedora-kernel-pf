@@ -655,6 +655,12 @@ Patch697: HID-wacom-fix-Bamboo-ONE-oops.patch
 #rhbz 1309980
 Patch698: 0001-ACPI-processor-Request-native-thermal-interrupt-hand.patch
 
+# CVE-2016-3961 rhbz 1327219 1323956
+Patch699: x86-xen-suppress-hugetlbfs-in-PV-guests.patch
+
+# CVE-2016-3955 rhbz 1328478 1328479
+Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
+
 #pf-kernel
 Patch999: pf-kernel-4.4-pf10.patch
 
@@ -2101,6 +2107,12 @@ fi
 #
 # 
 %changelog
+* Tue Apr 19 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3955 usbip: buffer overflow by trusting length of incoming packets  (rhbz 1328478 1328479)
+
+* Fri Apr 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3961 xen: hugetlbfs use may crash PV guests (rhbz 1327219 1323956)
+
 * Wed Apr 13 2016 Laura Abbott <labbott@fedoraproject.org>
 - Fix for Skylake pstate issues (rhbz 1309980)
 
