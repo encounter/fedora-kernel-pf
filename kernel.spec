@@ -22,7 +22,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define buildid .pf10
+%define buildid .pf11
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -646,7 +646,7 @@ Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
 Patch701: antenna_select.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.4-pf10.patch
+Patch999: pf-kernel-4.4-pf11.patch
 
 # END OF PATCH DEFINITIONS
 %endif
