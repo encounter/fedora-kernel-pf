@@ -645,6 +645,9 @@ Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
 #rhbz 1309487
 Patch701: antenna_select.patch
 
+# Follow on for CVE-2016-3156
+Patch702: ipv4-fib-don-t-warn-when-primary-address-is-missing-.patch
+
 #pf-kernel
 Patch999: pf-kernel-4.4-pf11.patch
 
@@ -2091,6 +2094,9 @@ fi
 #
 # 
 %changelog
+* Tue Apr 26 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable IEEE802154_AT86RF230 on more arches (rhbz 1330356)
+
 * Wed Apr 20 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.8-300
 - Linux v4.4.8
 - Allow antenna selection for rtl8723be (rhbz 1309487)
