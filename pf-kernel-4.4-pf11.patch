@@ -1,7 +1,7 @@
-From 84e393541571301179b771f191a355dddd6763a9 Mon Sep 17 00:00:00 2001
+From e9d931b13513a90897fd80b24a073074d18ad89e Mon Sep 17 00:00:00 2001
 From: Fedora Kernel Team <kernel-team@fedoraproject.org>
-Date: Thu, 14 Apr 2016 23:06:13 -0400
-Subject: [PATCH] pf-kernel 4.4-pf10
+Date: Thu, 21 Apr 2016 18:13:46 -0400
+Subject: [PATCH] pf-kernel 4.4-pf11
 
 ---
  Documentation/kernel-parameters.txt        |    3 +
@@ -234,10 +234,10 @@ Subject: [PATCH] pf-kernel 4.4-pf10
  create mode 100644 scripts/tuxonice_output_to_csv.sh
 
 diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 742f69d..ffad13f 100644
+index 0e4102a..7562b98 100644
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
-@@ -3966,6 +3966,9 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+@@ -3968,6 +3968,9 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
  					HIGHMEM regardless of setting
  					of CONFIG_HIGHPTE.
  
@@ -2247,15 +2247,15 @@ index 4c3e1d2..ba5d5e4 100644
  M:	Dario Ballabio <ballabio_dario@emc.com>
  L:	linux-scsi@vger.kernel.org
 diff --git a/Makefile b/Makefile
-index 348e2c8..c98790f 100644
+index 1987c23..195b145 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
  VERSION = 4
  PATCHLEVEL = 4
- SUBLEVEL = 7
+ SUBLEVEL = 8
 -EXTRAVERSION =
-+EXTRAVERSION = -pf10
++EXTRAVERSION = -pf11
  NAME = Blurry Fish Butt
  
  # *DOCUMENTATION*
@@ -11735,10 +11735,10 @@ index 1687557..afc7503 100644
  struct request;
  typedef void (rq_end_io_fn)(struct request *, int);
 diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 22c5a0c..61a81cf 100644
+index ab3d8d9..f692916 100644
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -1251,6 +1251,8 @@ struct mm_struct;
+@@ -1261,6 +1261,8 @@ struct mm_struct;
  #define UMOUNT_NOFOLLOW	0x00000008	/* Don't follow symlink on umount */
  #define UMOUNT_UNUSED	0x80000000	/* Flag guaranteed to be unused */
  
@@ -11747,7 +11747,7 @@ index 22c5a0c..61a81cf 100644
  /* sb->s_iflags */
  #define SB_I_CGROUPWB	0x00000001	/* cgroup-aware writeback enabled */
  #define SB_I_NOEXEC	0x00000002	/* Ignore executables on this fs */
-@@ -1736,6 +1738,8 @@ struct super_operations {
+@@ -1746,6 +1748,8 @@ struct super_operations {
  #else
  #define S_DAX		0	/* Make all the DAX code disappear */
  #endif
@@ -11756,7 +11756,7 @@ index 22c5a0c..61a81cf 100644
  
  /*
   * Note that nosuid etc flags are inode-specific: setting some file-system
-@@ -2264,6 +2268,13 @@ extern struct super_block *freeze_bdev(struct block_device *);
+@@ -2274,6 +2278,13 @@ extern struct super_block *freeze_bdev(struct block_device *);
  extern void emergency_thaw_all(void);
  extern int thaw_bdev(struct block_device *bdev, struct super_block *sb);
  extern int fsync_bdev(struct block_device *);
