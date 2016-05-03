@@ -342,7 +342,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, systemd >= 203-2
+%define kernel_prereq  fileutils, systemd >= 203-2, /usr/bin/kernel-install
 %define initrd_prereq  dracut >= 027
 
 
@@ -496,6 +496,8 @@ Source5005: kbuild-AFTER_LINK.patch
 
 Patch451: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
+Patch452: 0001-gpu-ipu-v3-Fix-imx-ipuv3-crtc-module-autoloading.patch
+
 Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 
 Patch456: arm64-acpi-drop-expert-patch.patch
@@ -647,6 +649,9 @@ Patch701: antenna_select.patch
 
 # Follow on for CVE-2016-3156
 Patch702: ipv4-fib-don-t-warn-when-primary-address-is-missing-.patch
+
+# Stop splashing crap about broken firmware BGRT
+Patch704: x86-efi-bgrt-Switch-all-pr_err-to-pr_debug-for-inval.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.4-pf11.patch
@@ -2094,6 +2099,13 @@ fi
 #
 # 
 %changelog
+* Fri Apr 29 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix i.MX6 graphics
+
+* Thu Apr 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Don't splash warnings from broken BGRT firmware implementations
+- Require /usr/bin/kernel-install (rhbz 1331012)
+
 * Tue Apr 26 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - Enable IEEE802154_AT86RF230 on more arches (rhbz 1330356)
 
