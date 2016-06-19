@@ -11,10 +11,12 @@ Summary: The Linux kernel
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
 %ifarch %{ix86} x86_64
+%global signkernel 1
 %global signmodules 1
 %global zipmodules 1
 %else
-%global signmodules 0
+%global signkernel 0
+%global signmodules 1
 %global zipmodules 0
 %endif
 
@@ -22,7 +24,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define buildid .pf11.haswell
+%define buildid .pf.haswell
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -40,19 +42,19 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 4
+%define base_sublevel 5
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -90,6 +92,7 @@ Summary: The Linux kernel
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
+%define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
 # perf
 %define with_perf      %{?_without_perf:      0} %{?!_without_perf:      1}
 # tools
@@ -227,6 +230,7 @@ Summary: The Linux kernel
 %ifarch noarch
 %define with_up 0
 %define with_headers 0
+%define with_cross_headers 0
 %define with_tools 0
 %define with_perf 0
 %define all_arch_configs kernel-%{version}-*.config
@@ -291,6 +295,7 @@ Summary: The Linux kernel
 # just like we used to only build them on i386 for x86
 %ifnarch armv7hl
 %define with_headers 0
+%define with_cross_headers 0
 %define with_perf 0
 %define with_tools 0
 %endif
@@ -388,13 +393,11 @@ BuildRequires: rpm-build, elfutils
 %define debuginfo_args --strict-build-id -r
 %endif
 
-%ifarch %{ix86} x86_64
-# MODULE_SIG is enabled in config-x86-generic and needs these:
+%if %{signkernel}%{signmodules}
 BuildRequires: openssl openssl-devel
-%endif
-
-%if %{signmodules}
+%if %{signkernel}
 BuildRequires: pesign >= 0.10-4
+%endif
 %endif
 
 %if %{with_cross}
@@ -493,20 +496,41 @@ Source5005: kbuild-AFTER_LINK.patch
 # Git trees.
 
 # Standalone patches
+Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 
-Patch451: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+Patch421: arm64-acpi-drop-expert-patch.patch
 
-Patch452: 0001-gpu-ipu-v3-Fix-imx-ipuv3-crtc-module-autoloading.patch
+# http://www.spinics.net/lists/arm-kernel/msg490981.html
+Patch422: geekbox-v4-device-tree-support.patch
 
-Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
+# http://www.spinics.net/lists/arm-kernel/msg483898.html
+Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
-Patch456: arm64-acpi-drop-expert-patch.patch
+# http://www.spinics.net/lists/linux-tegra/msg26029.html
+Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
-Patch457: ARM-tegra-usb-no-reset.patch
+# http://patchwork.ozlabs.org/patch/587554/
+Patch430: ARM-tegra-usb-no-reset.patch
 
-Patch460: mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
+Patch431: arm-i.MX6-Utilite-device-dtb.patch
 
-Patch463: arm-i.MX6-Utilite-device-dtb.patch
+# http://www.spinics.net/lists/linux-tegra/msg25152.html
+Patch432: Fix-tegra-to-use-stdout-path-for-serial-console.patch
+
+Patch433: bcm283x-Pull-upstream-fixes-plus-iproc-mmc-driver.patch
+
+# http://www.spinics.net/lists/netdev/msg369442.html
+Patch434: revert-stmmac-Fix-eth0-No-PHY-found-regression.patch
+Patch435: stmmac-fix-MDIO-settings.patch
+
+Patch436: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
+
+# mvebu DSA switch fixes
+# http://www.spinics.net/lists/netdev/msg370841.html http://www.spinics.net/lists/netdev/msg370842.html
+Patch438: 0001-net-dsa-mv88e6xxx-Introduce-_mv88e6xxx_phy_page_-rea.patch
+Patch439: 0002-net-dsa-mv88e6xxx-Clear-the-PDOWN-bit-on-setup.patch
+
+Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch466: input-kill-stupid-messages.patch
 
@@ -584,35 +608,14 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#rhbz 1287819
-Patch570: HID-multitouch-enable-palm-rejection-if-device-imple.patch
-
-#rhbz 1286293
-Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
-#rhbz 1288687
-Patch572: alua_fix.patch
-
-#rhbz 1083853
-Patch610: PNP-Add-Broadwell-to-Intel-MCH-size-workaround.patch
-
-#rhbz 1300955
-Patch640: PNP-Add-Haswell-ULT-to-Intel-MCH-size-workaround.patch
-
-#rhbz 1278942
-Patch643: media-ivtv-avoid-going-past-input-audio-array.patch
+#Required for some persistent memory options
+Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
 #rhbz 1255325
 Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 
-#Known use after free, possibly rhbz 1310579
-Patch654: 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
-
-#Mitigates CVE-2013-4312 rhbz 1313428 1313433
-Patch659: pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
-
-#rhbz 1310252 1313318
-Patch660: 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
+#rhbz 1309658
+Patch648: 0001-mm-CONFIG_NR_ZONES_EXTENDED.patch
 
 #CVE-2016-3135 rhbz 1317386 1317387
 Patch664: netfilter-x_tables-check-for-size-overflow.patch
@@ -620,43 +623,58 @@ Patch664: netfilter-x_tables-check-for-size-overflow.patch
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#CVE-2016-2187 rhbz 1317017 1317010
-Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
-
 # CVE-2016-3672 rhbz 1324749 1324750
-Patch690: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
+Patch689: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
-#CVE-2015-8839 rhbz 1323577 1323579
-Patch691: ext4-fix-races-between-page-faults-and-hole-punching.patch
-Patch692: ext4-move-unlocked-dio-protection-from-ext4_alloc_fi.patch
-Patch693: ext4-fix-races-between-buffered-IO-and-collapse-inse.patch
-Patch694: ext4-fix-races-of-writeback-with-punch-hole-and-zero.patch
-
-#CVE-2016-3951 rhbz 1324782 1324815
-Patch695: cdc_ncm-do-not-call-usbnet_link_change-from-cdc_ncm_.patch
-
-#rhbz 1309980
-Patch698: 0001-ACPI-processor-Request-native-thermal-interrupt-hand.patch
-
-# CVE-2016-3961 rhbz 1327219 1323956
-Patch699: x86-xen-suppress-hugetlbfs-in-PV-guests.patch
-
-# CVE-2016-3955 rhbz 1328478 1328479
-Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
-
-#rhbz 1309487
-Patch701: antenna_select.patch
-
-# Follow on for CVE-2016-3156
-Patch702: ipv4-fib-don-t-warn-when-primary-address-is-missing-.patch
+#rhbz 1302071
+Patch702: x86-build-Build-compressed-x86-kernels-as-PIE.patch
 
 # Stop splashing crap about broken firmware BGRT
 Patch704: x86-efi-bgrt-Switch-all-pr_err-to-pr_debug-for-inval.patch
 
+#rhbz 1331092
+Patch705: mm-thp-kvm-fix-memory-corruption-in-KVM-with-THP-ena.patch
+
+#CVE-2016-4482 rhbz 1332931 1332932
+Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
+
+#CVE-2016-4569 rhbz 1334643 1334645
+Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
+Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
+Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
+
+#CVE-2016-0758 rhbz 1300257 1335386
+Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
+
+#CVE-2016-4440 rhbz 1337806 1337807
+Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
+
+#CVE-2016-4951 rhbz 1338625 1338626
+Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#CVE-2016-5243 rhbz 1343338 1343335
+Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
+
+#CVE-2016-5244 rhbz 1343338 1343337
+Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
+
+#CVE-2016-1583 rhbz 1344721 1344722
+Patch723: proc-prevent-stacking-filesystems-on-top.patch
+Patch724: ecryptfs-fix-handling-of-directory-opening.patch
+Patch725: ecryptfs-forbid-opening-files-without-mmap-handler.patch
+Patch726: sched-panic-on-corrupted-stack-end.patch
+
+#CVE-2016-4470 rhbz 1341716 1346626
+Patch727: KEYS-potential-uninitialized-variable.patch
+
+#rhbz 1338025
+Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
+
 #pf-kernel
-Patch999: pf-kernel-4.4-pf11.patch
+Patch999: pf-kernel-4.5.7.patch
 
 # END OF PATCH DEFINITIONS
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -706,6 +724,17 @@ between the Linux kernel and userspace libraries and programs.  The
 header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 glibc package.
+
+%package cross-headers
+Summary: Header files for the Linux kernel for use by cross-glibc
+Group: Development/System
+%description cross-headers
+Kernel-cross-headers includes the C header files that specify the interface
+between the Linux kernel and userspace libraries and programs.  The
+header files define structures and constants that are needed for
+building most standard programs and are also needed for rebuilding the
+cross-glibc package.
+
 
 %package bootwrapper
 Summary: Boot wrapper files for generating combined kernel + initrd images
@@ -1358,7 +1387,7 @@ BuildKernel() {
     make -s mrproper
     cp configs/$Config .config
 
-    %if %{signmodules}
+    %if %{signkernel}%{signmodules}
     cp %{SOURCE11} certs/.
     %endif
 
@@ -1395,7 +1424,7 @@ BuildKernel() {
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/lib/modules/$KernelVer/zImage.stub-$KernelVer || :
     fi
-    %if %{signmodules}
+    %if %{signkernel}
     # Sign the image if we're using EFI
     %pesign -s -i $KernelImage -o vmlinuz.signed
     if [ ! -s vmlinuz.signed ]; then
@@ -1480,9 +1509,35 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
       cp -a --parents arch/%{asmarch}/mach-${Flavour}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+    # include a few files for 'make prepare'
+    cp -a --parents arch/arm/tools/gen-mach-types $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/arm/tools/mach-types $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+
 %endif
     cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-
+%ifarch %{ix86} x86_64
+    # files for 'make prepare' to succeed with kernel-devel
+    cp -a --parents arch/x86/entry/syscalls/syscall_32.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscalltbl.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscallhdr.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscall_64.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_32.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_64.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_common.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/sha256.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/sha256.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/stack.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/entry64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/ctype.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/generated/uapi/linux/version.h
@@ -1770,11 +1825,40 @@ find $RPM_BUILD_ROOT/usr/include \
 
 %endif
 
+%if %{with_cross_headers}
+mkdir -p $RPM_BUILD_ROOT/usr/tmp-headers
+make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr/tmp-headers headers_install_all
+
+find $RPM_BUILD_ROOT/usr/tmp-headers/include \
+     \( -name .install -o -name .check -o \
+     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+
+# Copy all the architectures we care about to their respective asm directories
+for arch in arm arm64 powerpc s390 x86 ; do
+mkdir -p $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include
+mv $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-${arch} $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/asm
+cp -a $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-generic $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/.
+done
+
+# Remove the rest of the architectures
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers/include/arch*
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-*
+
+# Copy the rest of the headers over
+for arch in arm arm64 powerpc s390 x86 ; do
+cp -a $RPM_BUILD_ROOT/usr/tmp-headers/include/* $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/.
+done
+
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
+%endif
+
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT lib=%{_lib} install-bin install-traceevent-plugins
 # remove the 'trace' symlink.
 rm -f %{buildroot}%{_bindir}/trace
+# remove the perf-tips
+rm -rf %{buildroot}%{_docdir}/perf-tip
 
 # python-perf extension
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
@@ -1954,6 +2038,12 @@ fi
 /usr/include/*
 %endif
 
+%if %{with_cross_headers}
+%files cross-headers
+%defattr(-,root,root)
+/usr/*-linux-gnu/include/*
+%endif
+
 %if %{with_bootwrapper}
 %files bootwrapper
 %defattr(-,root,root)
@@ -2071,6 +2161,7 @@ fi
 %defattr(-,root,root)\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
+%defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
 %defattr(-,root,root)\
@@ -2099,6 +2190,74 @@ fi
 #
 # 
 %changelog
+* Wed Jun 15 2016 Laura Abbott <labbott@fedoraproject.org>
+- hp-wmi: fix wifi cannot be hard-unblock (rhbz 1338025)
+
+* Wed Jun 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4470 keys: uninitialized variable crash (rhbz 1341716 1346626)
+
+* Mon Jun 13 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-1583 stack overflow via ecryptfs and /proc (rhbz 1344721 1344722)
+
+* Wed Jun 08 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.5.7-200
+- Linux v4.5.7
+
+* Tue Jun 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5244 info leak in rds (rhbz 1343338 1343337)
+- CVE-2016-5243 info leak in tipc (rhbz 1343338 1343335)
+
+* Wed Jun 01 2016 Justin M. Forbes <jforbes@fedoraproject.org> 4.5.6-200
+- Linux v4.5.6
+
+* Mon May 23 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4951 null ptr deref in tipc_nl_publ_dump (rhbz 1338625 1338626)
+
+* Fri May 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> 4.5.5-201
+- Remove the installonly additions until dnf can handle the transition
+
+* Fri May 20 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4440 kvm: incorrect state leading to APIC register access (rhbz 1337806 1337807)
+
+* Thu May 19 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.5.5-200
+- Linux v4.5.5
+- CVE-2016-4913 isofs: info leak with malformed NM entries (rhbz 1337528 1337529)
+
+* Mon May 16 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable CONFIG_DEBUG_VM_PGFLAGS on non debug kernels (rhbz 1335173)
+
+* Mon May 16 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3713 kvm: out-of-bounds access in set_var_mtrr_msr (rhbz 1332139 1336410)
+
+* Fri May 13 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-0758 pointer corruption in asn1 decoder (rhbz 1300257 1335386)
+
+* Wed May 11 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.4-200
+- Linux v4.5.4
+
+* Tue May 10 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable XEN SCSI front and backend (rhbz 1334512)
+- CVE-2016-4569 info leak in sound module (rhbz 1334643 1334645)
+
+* Mon May 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> -4.5.3-200
+- Linux v4.5.3 rebase
+
+* Mon May 09 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4557 bpf: Use after free vulnerability via double fdput
+  CVE-2016-4558 bpf: refcnt overflow (rhbz 1334307 1334303 1334311)
+ 
+* Fri May 06 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Oops in propogate_mnt if first copy is slave (rhbz 1333712 1333713)
+
+* Thu May 05 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4486 CVE-2016-4485 info leaks (rhbz 1333316 1333309 1333321)
+
+* Wed May 04 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.9-300
+- Linux v4.4.9
+
+* Wed May 04 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable NFC_NXP_NCI options (rhbz 1290556)
+- CVE-2016-4482 info leak in devio.c (rhbz 1332931 1332932)
+
 * Fri Apr 29 2016 Peter Robinson <pbrobinson@fedoraproject.org>
 - Add patch to fix i.MX6 graphics
 
