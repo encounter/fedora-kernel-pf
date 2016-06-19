@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -608,9 +608,6 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#rhbz 1286293
-Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
 #Required for some persistent memory options
 Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
@@ -629,9 +626,6 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 # CVE-2016-3672 rhbz 1324749 1324750
 Patch689: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
-#rhbz 1309487
-Patch701: antenna_select.patch
-
 #rhbz 1302071
 Patch702: x86-build-Build-compressed-x86-kernels-as-PIE.patch
 
@@ -644,9 +638,6 @@ Patch705: mm-thp-kvm-fix-memory-corruption-in-KVM-with-THP-ena.patch
 #CVE-2016-4482 rhbz 1332931 1332932
 Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
-#rhbz 1328633
-Patch713: sp5100_tco-properly-check-for-new-register-layouts.patch
-
 #CVE-2016-4569 rhbz 1334643 1334645
 Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
 Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
@@ -655,14 +646,29 @@ Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 #CVE-2016-0758 rhbz 1300257 1335386
 Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
-#CVE-2016-3713 rhbz 1332139 1336410
-Patch718: KVM-MTRR-remove-MSR-0x2f8.patch
-
 #CVE-2016-4440 rhbz 1337806 1337807
 Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#CVE-2016-5243 rhbz 1343338 1343335
+Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
+
+#CVE-2016-5244 rhbz 1343338 1343337
+Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
+
+#CVE-2016-1583 rhbz 1344721 1344722
+Patch723: proc-prevent-stacking-filesystems-on-top.patch
+Patch724: ecryptfs-fix-handling-of-directory-opening.patch
+Patch725: ecryptfs-forbid-opening-files-without-mmap-handler.patch
+Patch726: sched-panic-on-corrupted-stack-end.patch
+
+#CVE-2016-4470 rhbz 1341716 1346626
+Patch727: KEYS-potential-uninitialized-variable.patch
+
+#rhbz 1338025
+Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.5-pf5.patch
@@ -1381,7 +1387,7 @@ BuildKernel() {
     make -s mrproper
     cp configs/$Config .config
 
-    %if %{signmodules}
+    %if %{signkernel}%{signmodules}
     cp %{SOURCE11} certs/.
     %endif
 
@@ -2155,6 +2161,7 @@ fi
 %defattr(-,root,root)\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
+%defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
 %defattr(-,root,root)\
@@ -2183,6 +2190,25 @@ fi
 #
 # 
 %changelog
+* Wed Jun 15 2016 Laura Abbott <labbott@fedoraproject.org>
+- hp-wmi: fix wifi cannot be hard-unblock (rhbz 1338025)
+
+* Wed Jun 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4470 keys: uninitialized variable crash (rhbz 1341716 1346626)
+
+* Mon Jun 13 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-1583 stack overflow via ecryptfs and /proc (rhbz 1344721 1344722)
+
+* Wed Jun 08 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.5.7-200
+- Linux v4.5.7
+
+* Tue Jun 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5244 info leak in rds (rhbz 1343338 1343337)
+- CVE-2016-5243 info leak in tipc (rhbz 1343338 1343335)
+
+* Wed Jun 01 2016 Justin M. Forbes <jforbes@fedoraproject.org> 4.5.6-200
+- Linux v4.5.6
+
 * Mon May 23 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - CVE-2016-4951 null ptr deref in tipc_nl_publ_dump (rhbz 1338625 1338626)
 
