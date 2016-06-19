@@ -24,7 +24,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define buildid .pf5
+%define buildid .pf
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -671,7 +671,7 @@ Patch727: KEYS-potential-uninitialized-variable.patch
 Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.5-pf5.patch
+Patch999: pf-kernel-4.5.7.patch
 
 # END OF PATCH DEFINITIONS
 
