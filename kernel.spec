@@ -24,7 +24,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define buildid .pf11
+%define buildid .pf5
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -663,6 +663,9 @@ Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#pf-kernel
+Patch999: pf-kernel-4.5-pf5.patch
 
 # END OF PATCH DEFINITIONS
 
