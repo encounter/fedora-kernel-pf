@@ -5,3 +5,4 @@ clog
 *.orig
 kernel-[234].*/
 perf-man-*.tar.gz
+.build-*.log
