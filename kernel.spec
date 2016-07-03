@@ -660,7 +660,7 @@ Patch830: posix_acl-Add-set_posix_acl.patch
 Patch831: nfsd-check-permissions-when-setting-ACLs.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.5.7.patch
+Patch999: pf-kernel-4.6.3.patch
 
 # END OF PATCH DEFINITIONS
 
