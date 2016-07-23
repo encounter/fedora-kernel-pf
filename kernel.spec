@@ -677,7 +677,7 @@ Patch837: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
 Patch838: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.6.3.patch
+Patch999: pf-kernel-4.6.4.patch
 
 # END OF PATCH DEFINITIONS
 
