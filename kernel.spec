@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -659,8 +659,25 @@ Patch826: HID-hiddev-validate-num_values-for-HIDIOCGUSAGES-HID.patch
 Patch830: posix_acl-Add-set_posix_acl.patch
 Patch831: nfsd-check-permissions-when-setting-ACLs.patch
 
+#CVE-2016-6156 rhbz 1353490 1353491
+Patch832: platform-chrome-cros_ec_dev-double-fetch-bug-in-ioct.patch
+
+#rbhz 1351205
+Patch833: drm-nouveau-disp-sor-gf119-select-correct-sor-when.patch
+
+#rhbz 1346753
+Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
+
+#CVE-2016-5389 CVE-2016-5969 rhbz 1354708 1355615
+Patch835: tcp-make-challenge-acks-less-predictable.patch
+
+# https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
+Patch836: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
+Patch837: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
+Patch838: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
+
 #pf-kernel
-Patch999: pf-kernel-4.6.3.patch
+Patch999: pf-kernel-4.6.4.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2187,6 +2204,20 @@ fi
 #
 # 
 %changelog
+* Thu Jul 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix various i915 uncore oopses (rhbz 1340218 1325020 1342722 1347681)
+
+* Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-301
+- CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
+
+* Mon Jul 11 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-300
+- Linux v4.6.4
+
+* Thu Jul 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in qla2xxx driver (rhbz 1346753)
+- Fix blank screen on some nvidia cards (rbhz 1351205)
+- CVE-2016-6156 race condition in chrome chardev driver (rhbz 1353490 1353491)
+
 * Fri Jul 01 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - Reenable CONFIG_DW_DMAC_CORE=y to fix sound on some Broadwell machines (rhbz 1351738 1352176)
 
