@@ -1,14 +1,14 @@
-From cd344194f227f938b6d22a9aac78947d90567e3e Mon Sep 17 00:00:00 2001
+From 1a3601fadb0f4b7c089b469007202dd2601ca768 Mon Sep 17 00:00:00 2001
 From: Fedora Kernel Team <kernel-team@fedoraproject.org>
-Date: Sat, 23 Jul 2016 14:57:06 -0400
-Subject: [PATCH] pf-kernel 4.6.4
+Date: Mon, 15 Aug 2016 20:40:15 -0400
+Subject: [PATCH] pf-kernel 4.6.6
 
 ---
  Documentation/block/queue-sysfs.txt             |   22 +
  Documentation/block/writeback_cache_control.txt |    4 +-
  Documentation/scheduler/sched-BFS.txt           |  357 +
  Documentation/sysctl/kernel.txt                 |   26 +
- Makefile                                        |    6 +-
+ Makefile                                        |    2 +-
  arch/powerpc/platforms/cell/spufs/sched.c       |    5 -
  arch/um/drivers/ubd_kern.c                      |    2 +-
  arch/x86/Kconfig                                |   34 +-
@@ -24,7 +24,6 @@ Subject: [PATCH] pf-kernel 4.6.4
  block/bfq-iosched.c                             | 4895 ++++++++++++++
  block/bfq-sched.c                               | 1450 ++++
  block/bfq.h                                     |  848 +++
- block/bio.c                                     |   15 +
  block/blk-core.c                                |   26 +-
  block/blk-flush.c                               |   11 +-
  block/blk-mq-sysfs.c                            |   47 +
@@ -62,7 +61,6 @@ Subject: [PATCH] pf-kernel 4.6.4
  drivers/scsi/sd.c                               |    8 +-
  drivers/target/target_core_iblock.c             |    6 +-
  fs/block_dev.c                                  |    2 +-
- fs/btrfs/extent_io.c                            |    6 -
  fs/buffer.c                                     |    2 +-
  fs/f2fs/data.c                                  |    2 +-
  fs/f2fs/node.c                                  |    2 +-
@@ -71,7 +69,6 @@ Subject: [PATCH] pf-kernel 4.6.4
  fs/proc/base.c                                  |    2 +-
  fs/xfs/xfs_aops.c                               |    2 +-
  include/linux/backing-dev-defs.h                |    2 +
- include/linux/bio.h                             |    3 +
  include/linux/blk_types.h                       |   12 +-
  include/linux/blkdev.h                          |   30 +-
  include/linux/fs.h                              |    4 +
@@ -111,7 +108,7 @@ Subject: [PATCH] pf-kernel 4.6.4
  net/ipv4/tcp_output.c                           |    2 +-
  net/sched/sch_api.c                             |    1 -
  net/sched/sch_fq_codel.c                        |   64 +-
- 107 files changed, 19599 insertions(+), 246 deletions(-)
+ 104 files changed, 19579 insertions(+), 238 deletions(-)
  create mode 100644 Documentation/scheduler/sched-BFS.txt
  create mode 100644 block/bfq-cgroup.c
  create mode 100644 block/bfq-ioc.c
@@ -604,21 +601,18 @@ index fcddfd5..4bd13e0 100644
  
  The file rtsig-max can be used to tune the maximum number
 diff --git a/Makefile b/Makefile
-index 7c5ebdd..7d1d5ca 100644
+index bde9535..672d1cd 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1,8 +1,8 @@
+@@ -1,7 +1,7 @@
  VERSION = 4
  PATCHLEVEL = 6
--SUBLEVEL = 4
+ SUBLEVEL = 6
 -EXTRAVERSION =
--NAME = Charred Weasel
-+SUBLEVEL = 0
 +EXTRAVERSION = -pf1
-+NAME = Spam
+ NAME = Charred Weasel
  
  # *DOCUMENTATION*
- # To see a list of typical targets execute "make help"
 diff --git a/arch/powerpc/platforms/cell/spufs/sched.c b/arch/powerpc/platforms/cell/spufs/sched.c
 index 998f632..5c80a0f 100644
 --- a/arch/powerpc/platforms/cell/spufs/sched.c
@@ -2452,7 +2446,7 @@ index 0000000..fb7bb8f
 +}
 diff --git a/block/bfq-iosched.c b/block/bfq-iosched.c
 new file mode 100644
-index 0000000..d97c730
+index 0000000..d1f3666
 --- /dev/null
 +++ b/block/bfq-iosched.c
 @@ -0,0 +1,4895 @@
@@ -7276,7 +7270,7 @@ index 0000000..d97c730
 +static int __init bfq_init(void)
 +{
 +	int ret;
-+	char msg[50] = "BFQ I/O-scheduler: v8-rc6";
++	char msg[50] = "BFQ I/O-scheduler: v8";
 +
 +	/*
 +	 * Can be 0 on HZ < 1000 setups.
@@ -8809,12 +8803,12 @@ index 0000000..e54b149
 +}
 diff --git a/block/bfq.h b/block/bfq.h
 new file mode 100644
-index 0000000..b8ad02a
+index 0000000..9e76b27
 --- /dev/null
 +++ b/block/bfq.h
 @@ -0,0 +1,848 @@
 +/*
-+ * BFQ-v8 for 4.7.0: data structures and common functions prototypes.
++ * BFQ-v8 for 4.6.0: data structures and common functions prototypes.
 + *
 + * Based on ideas and code from CFQ:
 + * Copyright (C) 2003 Jens Axboe <axboe@kernel.dk>
@@ -9661,46 +9655,6 @@ index 0000000..b8ad02a
 +static void bfq_exit_bfqq(struct bfq_data *bfqd, struct bfq_queue *bfqq);
 +
 +#endif /* _BFQ_H */
-diff --git a/block/bio.c b/block/bio.c
-index 807d25e..89f517c 100644
---- a/block/bio.c
-+++ b/block/bio.c
-@@ -590,6 +590,8 @@ void __bio_clone_fast(struct bio *bio, struct bio *bio_src)
- 	bio->bi_rw = bio_src->bi_rw;
- 	bio->bi_iter = bio_src->bi_iter;
- 	bio->bi_io_vec = bio_src->bi_io_vec;
-+
-+	bio_clone_blkcg_association(bio, bio_src);
- }
- EXPORT_SYMBOL(__bio_clone_fast);
- 
-@@ -695,6 +697,8 @@ integrity_clone:
- 		}
- 	}
- 
-+	bio_clone_blkcg_association(bio, bio_src);
-+
- 	return bio;
- }
- EXPORT_SYMBOL(bio_clone_bioset);
-@@ -2016,6 +2020,17 @@ void bio_disassociate_task(struct bio *bio)
- 	}
- }
- 
-+/**
-+ * bio_clone_blkcg_association - clone blkcg association from src to dst bio
-+ * @dst: destination bio
-+ * @src: source bio
-+ */
-+void bio_clone_blkcg_association(struct bio *dst, struct bio *src)
-+{
-+	if (src->bi_css)
-+		WARN_ON(bio_associate_blkcg(dst, src->bi_css));
-+}
-+
- #endif /* CONFIG_BLK_CGROUP */
- 
- static void __init biovec_init_slabs(void)
 diff --git a/block/blk-core.c b/block/blk-core.c
 index b60537b..c166d46 100644
 --- a/block/blk-core.c
@@ -10778,10 +10732,10 @@ index 26aa080..3355f1c 100644
  
  	if (q && blk_queue_secdiscard(q))
 diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
-index 6405b65..ca13df8 100644
+index d6ea31d..fcc5b4e 100644
 --- a/drivers/block/xen-blkfront.c
 +++ b/drivers/block/xen-blkfront.c
-@@ -998,7 +998,8 @@ static const char *flush_info(unsigned int feature_flush)
+@@ -995,7 +995,8 @@ static const char *flush_info(unsigned int feature_flush)
  
  static void xlvbd_flush(struct blkfront_info *info)
  {
@@ -10792,7 +10746,7 @@ index 6405b65..ca13df8 100644
  		info->gd->disk_name, flush_info(info->feature_flush),
  		"persistent grants:", info->feature_persistent ?
 diff --git a/drivers/cpufreq/cpufreq.c b/drivers/cpufreq/cpufreq.c
-index c4acfc5..d149b70 100644
+index e380457..192704e 100644
 --- a/drivers/cpufreq/cpufreq.c
 +++ b/drivers/cpufreq/cpufreq.c
 @@ -25,6 +25,7 @@
@@ -11038,10 +10992,10 @@ index 1105db2..d34bc35 100644
  
  	complete(&host->detect_ms_exit);
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index b0a2741..911ef32 100644
+index 185bd35..c8dc34b 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -2271,7 +2271,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+@@ -2273,7 +2273,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
  	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
  	     card->ext_csd.rel_sectors)) {
  		md->flags |= MMC_BLK_REL_WR;
@@ -11104,7 +11058,7 @@ index 1deb6ad..75455d4 100644
  }
  EXPORT_SYMBOL(scsi_change_queue_depth);
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index b81be7e..7bb896b 100644
+index b5c7a7a..6c3bb37 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -137,15 +137,15 @@ static const char *sd_cache_types[] = {
@@ -11166,23 +11120,6 @@ index 20a2c02..8662da6 100644
  	const struct block_device_operations *ops = bdev->bd_disk->fops;
  
  	if (!ops->rw_page || bdev_get_integrity(bdev))
-diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-index d247fc0..19f6739 100644
---- a/fs/btrfs/extent_io.c
-+++ b/fs/btrfs/extent_io.c
-@@ -2686,12 +2686,6 @@ struct bio *btrfs_bio_clone(struct bio *bio, gfp_t gfp_mask)
- 		btrfs_bio->csum = NULL;
- 		btrfs_bio->csum_allocated = NULL;
- 		btrfs_bio->end_io = NULL;
--
--#ifdef CONFIG_BLK_CGROUP
--		/* FIXME, put this into bio_clone_bioset */
--		if (bio->bi_css)
--			bio_associate_blkcg(new, bio->bi_css);
--#endif
- 	}
- 	return new;
- }
 diff --git a/fs/buffer.c b/fs/buffer.c
 index af0d9a8..46763c5 100644
 --- a/fs/buffer.c
@@ -11323,25 +11260,6 @@ index 3f10307..1212c37 100644
  	struct list_head bdi_node;	/* anchored at bdi->wb_list */
  
  #ifdef CONFIG_CGROUP_WRITEBACK
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 6b7481f..16cbe59 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -527,11 +527,14 @@ extern unsigned int bvec_nr_vecs(unsigned short idx);
- int bio_associate_blkcg(struct bio *bio, struct cgroup_subsys_state *blkcg_css);
- int bio_associate_current(struct bio *bio);
- void bio_disassociate_task(struct bio *bio);
-+void bio_clone_blkcg_association(struct bio *dst, struct bio *src);
- #else	/* CONFIG_BLK_CGROUP */
- static inline int bio_associate_blkcg(struct bio *bio,
- 			struct cgroup_subsys_state *blkcg_css) { return 0; }
- static inline int bio_associate_current(struct bio *bio) { return -ENOENT; }
- static inline void bio_disassociate_task(struct bio *bio) { }
-+static inline void bio_clone_blkcg_association(struct bio *dst,
-+			struct bio *src) { return 0; }
- #endif	/* CONFIG_BLK_CGROUP */
- 
- #ifdef CONFIG_HIGHMEM
 diff --git a/include/linux/blk_types.h b/include/linux/blk_types.h
 index 86a38ea..2b4414f 100644
 --- a/include/linux/blk_types.h
@@ -12125,7 +12043,7 @@ index 5f0fe01..f170d61 100644
  /* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork */
  #define SCHED_RESET_ON_FORK     0x40000000
 diff --git a/init/Kconfig b/init/Kconfig
-index d614dd5..d05e56a 100644
+index 2a17b2f..05358c7 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
 @@ -28,6 +28,20 @@ config BUILDTIME_EXTABLE_SORT
@@ -12206,7 +12124,7 @@ index d614dd5..d05e56a 100644
  	select CGROUPS
  	select CGROUP_SCHED
  	select FAIR_GROUP_SCHED
-@@ -1709,38 +1729,8 @@ config COMPAT_BRK
+@@ -1710,38 +1730,8 @@ config COMPAT_BRK
  
  	  On non-ancient distros (post-2000 ones) N is usually a safe choice.
  
@@ -21096,7 +21014,7 @@ index 928c4ba..7bad235 100644
  DEFINE_PER_CPU(struct update_util_data *, cpufreq_update_util_data);
  
 diff --git a/kernel/sched/idle.c b/kernel/sched/idle.c
-index bd12c6c..f9d1dbf 100644
+index c5aeedf..e362a83 100644
 --- a/kernel/sched/idle.c
 +++ b/kernel/sched/idle.c
 @@ -14,7 +14,11 @@
@@ -21212,7 +21130,7 @@ index 4008d9f..6931b6e 100644
  	depends on SMP
  	depends on HAVE_CONTEXT_TRACKING
 diff --git a/kernel/time/posix-cpu-timers.c b/kernel/time/posix-cpu-timers.c
-index 1cafba8..e284c23 100644
+index 39008d7..784f3a1 100644
 --- a/kernel/time/posix-cpu-timers.c
 +++ b/kernel/time/posix-cpu-timers.c
 @@ -447,7 +447,7 @@ static void cleanup_timers(struct list_head *head)
@@ -21224,7 +21142,7 @@ index 1cafba8..e284c23 100644
  						sizeof(unsigned long long));
  	cleanup_timers(tsk->cpu_timers);
  
-@@ -847,7 +847,7 @@ static void check_thread_timers(struct task_struct *tsk,
+@@ -848,7 +848,7 @@ static void check_thread_timers(struct task_struct *tsk,
  	tsk_expires->virt_exp = expires_to_cputime(expires);
  
  	tsk_expires->sched_exp = check_timers_list(++timers, firing,
@@ -21233,7 +21151,7 @@ index 1cafba8..e284c23 100644
  
  	/*
  	 * Check for the special case thread timers.
-@@ -858,7 +858,7 @@ static void check_thread_timers(struct task_struct *tsk,
+@@ -859,7 +859,7 @@ static void check_thread_timers(struct task_struct *tsk,
  			READ_ONCE(sig->rlim[RLIMIT_RTTIME].rlim_max);
  
  		if (hard != RLIM_INFINITY &&
@@ -21242,7 +21160,7 @@ index 1cafba8..e284c23 100644
  			/*
  			 * At the hard limit, we just die.
  			 * No need to calculate anything else now.
-@@ -866,7 +866,7 @@ static void check_thread_timers(struct task_struct *tsk,
+@@ -867,7 +867,7 @@ static void check_thread_timers(struct task_struct *tsk,
  			__group_send_sig_info(SIGKILL, SEND_SIG_PRIV, tsk);
  			return;
  		}
@@ -21251,7 +21169,7 @@ index 1cafba8..e284c23 100644
  			/*
  			 * At the soft limit, send a SIGXCPU every second.
  			 */
-@@ -1114,7 +1114,7 @@ static inline int fastpath_timer_check(struct task_struct *tsk)
+@@ -1115,7 +1115,7 @@ static inline int fastpath_timer_check(struct task_struct *tsk)
  		struct task_cputime task_sample;
  
  		task_cputime(tsk, &task_sample.utime, &task_sample.stime);
@@ -21905,10 +21823,10 @@ index 0c6317b..41db7df 100644
  	wb->congested = wb_congested_get_create(bdi, blkcg_id, gfp);
  	if (!wb->congested)
 diff --git a/mm/page-writeback.c b/mm/page-writeback.c
-index bc5149d..47e2cd6 100644
+index e389f0a..4f4fac0 100644
 --- a/mm/page-writeback.c
 +++ b/mm/page-writeback.c
-@@ -1746,7 +1746,9 @@ pause:
+@@ -1749,7 +1749,9 @@ pause:
  					  pause,
  					  start_time);
  		__set_current_state(TASK_KILLABLE);
