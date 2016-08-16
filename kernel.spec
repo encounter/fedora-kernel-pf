@@ -652,7 +652,7 @@ Patch842: kvm-ppc-Book3S-HV-Pull-out-TM-state-save.patch
 Patch843: kvm-ppc-Book3S-HV-Save-restore-TM-state.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.6.4.patch
+Patch999: pf-kernel-4.6.6.patch
 
 # END OF PATCH DEFINITIONS
 
