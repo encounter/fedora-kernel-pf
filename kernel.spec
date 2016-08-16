@@ -656,7 +656,7 @@ Patch843: kvm-ppc-Book3S-HV-Save-restore-TM-state.patch
 Patch844: openstack_fix.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.6.4.patch
+Patch999: pf-kernel-4.6.6.patch
 
 # END OF PATCH DEFINITIONS
 
