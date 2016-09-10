@@ -641,7 +641,7 @@ Patch861: 0001-cgroup-reduce-read-locked-section-of-cgroup_threadgr.patch
 Patch862: tip-x86-boot-x86-KASLR-x86-power-Remove-x86-hibernation-restrictions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.6.6.patch
+Patch999: pf-kernel-4.7.3.patch
 
 # END OF PATCH DEFINITIONS
 
