@@ -640,7 +640,7 @@ Patch864: 0001-iio-Use-event-header-from-kernel-tree.patch
 Patch865: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.7.3.patch
+Patch999: pf-kernel-4.7.10.patch
 
 # END OF PATCH DEFINITIONS
 
