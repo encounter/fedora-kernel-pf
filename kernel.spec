@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -621,23 +621,23 @@ Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 #rhbz 1353558
 Patch844: 0001-selinux-Only-apply-bounds-checking-to-source-types.patch
 
-#rhbz 1365940
-Patch856: 0001-udp-fix-poll-issue-with-zero-sized-packets.patch
-
 #rhbz 13700161
 Patch857: kernel-panic-TPROXY-vanilla-4.7.1.patch
-
-# lkml.kernel.org/r/<20160822093249.GA14916@dhcp22.suse.cz>
-Patch858: 0001-OOM-detection-regressions-since-4.7.patch
 
 #rhbz 1360688
 Patch859: rc-core-fix-repeat-events.patch
 
-# https://lkml.org/lkml/2016/8/30/566
-Patch861: 0001-cgroup-reduce-read-locked-section-of-cgroup_threadgr.patch
-
 #rhbz 1350174
 Patch862: tip-x86-boot-x86-KASLR-x86-power-Remove-x86-hibernation-restrictions.patch
+
+#rhbz 1374212
+Patch863: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
+
+#ongoing complaint, full discussion delayed until ksummit/plumbers
+Patch864: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+# CVE-2016-9083 CVE-2016-9084 rhbz 1389258 1389259 1389285
+Patch865: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.7.3.patch
@@ -2164,6 +2164,41 @@ fi
 #
 # 
 %changelog
+* Thu Oct 27 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-9083 CVE-2016-9084 vfio multiple flaws (rhbz 1389258 1389259 1389285)
+
+* Wed Oct 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.10-100
+- Linux v4.7.10
+
+* Thu Oct 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.9-100
+- Linux v4.7.9
+- CVE-2016-5195 (rhbz 1384344 1387080)
+
+* Tue Oct 18 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in AXP20X_I2C (should fix rhbz 1352140)
+
+* Mon Oct 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.8-100
+- Linux v4.7.8
+
+* Fri Oct 07 2016 Laura Abbott <labbott@redhat.com> - 4.7.7-100
+- Linux v4.7.7
+
+* Mon Oct 03 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.6-100
+- Linux v4.7.6
+
+* Mon Sep 26 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.5-100
+- Linux v4.7.5
+
+* Mon Sep 19 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-7425 SCSI arcmsr buffer overflow (rhbz 1377330 1377331)
+
+* Thu Sep 15 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.4-100
+- Linux v4.7.4
+
+* Wed Sep 14 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for incorrect return checking in cpupower (rhbz 1374212)
+- Let iio tools build on older kernels
+
 * Wed Sep 07 2016 <labbott@fedoraproject.org> - 4.7.3-100
 - Linux v4.7.3
 - Silence KASLR warning (rhbz 1350174)
