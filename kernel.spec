@@ -42,19 +42,19 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 202
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 7
+%define base_sublevel 8
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -497,23 +497,33 @@ Source5005: kbuild-AFTER_LINK.patch
 
 # Standalone patches
 
-Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
+# http://www.spinics.net/lists/arm-kernel/msg523359.html
+Patch420: arm64-ACPI-parse-SPCR-table.patch
+
+# a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
+Patch421: qcom-QDF2432-tmp-errata.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
 Patch422: geekbox-v4-device-tree-support.patch
 
-Patch424: arm64-pcie-acpi.patch
-Patch425: arm64-pcie-quirks-xgene.patch
+# http://www.spinics.net/lists/linux-pci/msg53991.html
+# https://patchwork.kernel.org/patch/9337113/
+Patch425: arm64-pcie-quirks.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
+
+Patch427: ARM-OMAP4-Fix-crashes.patch
+Patch428: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
 
 Patch431: bcm2837-initial-support.patch
 
-Patch432: arm-i.MX6-Utilite-device-dtb.patch
+Patch432: bcm283x-vc4-fixes.patch
+
+Patch433: AllWinner-net-emac.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -576,7 +586,8 @@ Patch494: disable-i8042-check-on-apple-mac.patch
 
 Patch495: lis3-improve-handling-of-null-rate.patch
 
-Patch496: watchdog-Disable-watchdog-on-virtual-machines.patch
+# In theory this has been fixed so should no longer be needed, it also causes problems with aarch64 DMI, so disable to see for sure if it's fixed
+# Patch496: watchdog-Disable-watchdog-on-virtual-machines.patch
 
 Patch497: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -594,54 +605,38 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#Required for some persistent memory options
-Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
-
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#skl_update_other_pipe_wm issue patch-series from drm-next, rhbz 1305038
-Patch801: 0001-drm-i915-Reorganize-WM-structs-unions-in-CRTC-state.patch
-Patch802: 0002-drm-i915-Rename-s-skl_compute_pipe_wm-skl_build_pipe.patch
-Patch803: 0003-drm-i915-gen9-Cache-plane-data-rates-in-CRTC-state.patch
-Patch804: 0004-drm-i915-gen9-Allow-calculation-of-data-rate-for-in-.patch
-Patch805: 0005-drm-i915-gen9-Store-plane-minimum-blocks-in-CRTC-wm-.patch
-Patch806: 0006-drm-i915-Track-whether-an-atomic-transaction-changes.patch
-Patch807: 0007-drm-i915-gen9-Allow-skl_allocate_pipe_ddb-to-operate.patch
-Patch808: 0008-drm-i915-Add-distrust_bios_wm-flag-to-dev_priv-v2.patch
-Patch809: 0009-drm-i915-gen9-Compute-DDB-allocation-at-atomic-check.patch
-Patch810: 0010-drm-i915-gen9-Drop-re-allocation-of-DDB-at-atomic-co.patch
-Patch811: 0011-drm-i915-gen9-Calculate-plane-WM-s-from-state.patch
-Patch812: 0012-drm-i915-gen9-Allow-watermark-calculation-on-in-flig.patch
-Patch813: 0013-drm-i915-gen9-Use-a-bitmask-to-track-dirty-pipe-wate.patch
-Patch814: 0014-drm-i915-gen9-Propagate-watermark-calculation-failur.patch
-Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
-Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
-Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
+#rhbz 1200901 (There should be something better upstream at some point)
+Patch842: qxl-reapply-cursor-after-SetCrtc-calls.patch
 
-#rhbz 1353558
-Patch844: 0001-selinux-Only-apply-bounds-checking-to-source-types.patch
+# From kernel list, currently in linux-next
+Patch845: HID-microsoft-Add-Surface-4-type-cover-pro-4-JP.patch
 
-#rhbz 1365940
-Patch856: 0001-udp-fix-poll-issue-with-zero-sized-packets.patch
-
-#rhbz 13700161
-Patch857: kernel-panic-TPROXY-vanilla-4.7.1.patch
-
-# lkml.kernel.org/r/<20160822093249.GA14916@dhcp22.suse.cz>
-Patch858: 0001-OOM-detection-regressions-since-4.7.patch
+# SELinux OverlayFS support (queued for 4.9)
+Patch846: security-selinux-overlayfs-support.patch
 
 #rhbz 1360688
-Patch859: rc-core-fix-repeat-events.patch
+Patch847: rc-core-fix-repeat-events.patch
 
-# https://lkml.org/lkml/2016/8/30/566
-Patch861: 0001-cgroup-reduce-read-locked-section-of-cgroup_threadgr.patch
+#rhbz 1374212
+Patch848: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
 
-#rhbz 1350174
-Patch862: tip-x86-boot-x86-KASLR-x86-power-Remove-x86-hibernation-restrictions.patch
+#ongoing complaint, full discussion delayed until ksummit/plumbers
+Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+# CVE-2016-9083 CVE-2016-9084 rhbz 1389258 1389259 1389285
+Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
+
+#rhbz 1325354
+Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
+
+#rhbz 1391279
+Patch853: 0001-dm-raid-fix-compat_features-validation.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.7.3.patch
+Patch999: pf-kernel-4.8.6.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2170,6 +2165,53 @@ fi
 #
 # 
 %changelog
+* Wed Nov  2 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.6-201
+- dm raid: fix compat_features validation (rhbz 1391279)
+
+* Tue Nov  1 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Linux v4.8.6
+- Fixes for omap4 (panda board)
+
+* Fri Oct 28 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.5-200
+- Linux v4.8.5
+
+* Thu Oct 27 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-9083 CVE-2016-9084 vfio multiple flaws (rhbz 1389258 1389259 1389285)
+- Skylake i915 fixes from 4.9
+- Fix MS input devices identified as joysticks (rhbz 1325354)
+
+* Mon Oct 24 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.4-200
+- Linux v4.8.4 rebase
+
+* Thu Oct 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.9-200
+- Linux v4.7.9
+- CVE-2016-5195 (rhbz 1384344 1387080)
+
+* Tue Oct 18 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in AXP20X_I2C (should fix rhbz 1352140)
+
+* Mon Oct 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.8-200
+- Linux v4.7.8
+
+* Fri Oct 07 2016 Laura Abbott <labbott@redhat.com> - 4.7.7-200
+- Linux v4.7.7
+
+* Mon Oct 03 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.6-200
+- Linux v4.7.6
+
+* Mon Sep 26 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.5-200
+- Linux v4.7.5
+
+* Mon Sep 19 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-7425 SCSI arcmsr buffer overflow (rhbz 1377330 1377331)
+
+* Thu Sep 15 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.4-200
+- Linux v4.7.4
+
+* Wed Sep 14 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for incorrect return checking in cpupower (rhbz 1374212)
+- Let iio tools build on older kernels
+
 * Wed Sep 07 2016 <labbott@fedoraproject.org> - 4.7.3-200
 - Linux v4.7.3
 - Silence KASLR warning (rhbz 1350174)
