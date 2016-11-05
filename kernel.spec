@@ -636,7 +636,7 @@ Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 Patch853: 0001-dm-raid-fix-compat_features-validation.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.7.3.patch
+Patch999: pf-kernel-4.8.6.patch
 
 # END OF PATCH DEFINITIONS
 
