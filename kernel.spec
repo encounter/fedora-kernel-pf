@@ -24,7 +24,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-# define buildid .local
+%define buildid .pf
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -371,7 +371,7 @@ Requires: kernel-modules-uname-r = %{KVERREL}%{?variant}
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk, lz4
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
@@ -639,6 +639,9 @@ Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
 #rhbz 1391279
 Patch853: 0001-dm-raid-fix-compat_features-validation.patch
+
+#pf-kernel
+Patch999: pf-kernel-4.8.6.patch
 
 # END OF PATCH DEFINITIONS
 
