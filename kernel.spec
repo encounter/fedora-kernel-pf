@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -625,9 +625,6 @@ Patch846: security-selinux-overlayfs-support.patch
 #rhbz 1360688
 Patch847: rc-core-fix-repeat-events.patch
 
-#rhbz 1374212
-Patch848: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
-
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
 
@@ -637,8 +634,14 @@ Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 #rhbz 1325354
 Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
-#rhbz 1391279
-Patch853: 0001-dm-raid-fix-compat_features-validation.patch
+#rhbz 1392885
+Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
+
+#rhbz 1390308
+Patch854: nouveau-add-maxwell-to-backlight-init.patch
+
+#rhbz 1385823
+Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.8.6.patch
@@ -2179,6 +2182,30 @@ fi
 #
 #
 %changelog
+* Tue Nov 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Dave Anderson to fix live system crash analysis on Aarch64
+
+* Mon Nov 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.10-300
+- Linux v4.8.10
+
+* Sun Nov 20 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config tweaks
+
+* Tue Nov 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.8-300
+- Linux v4.8.8
+- Fix crash in tcp_collapse CVE-2016-8645 (rhbz 1393904 1393908)
+
+* Mon Nov 14 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for some Yoga laptop WIFI (rhbz 1385823)
+
+* Fri Nov 11 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Nouveau: Add Maxwell to backlight initialization (rhbz 1390308)
+
+* Thu Nov 10 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.7-300
+- Linux v4.8.7
+- Fixes cve-2016-8630 (rhbz 1393350 1393358)
+- Refresh status of MST capable connectors (rhbz 1392885)
+
 * Wed Nov  2 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.6-301
 - dm raid: fix compat_features validation (rhbz 1391279)
 
