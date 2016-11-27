@@ -1,7 +1,7 @@
-From 4364b625d0576a57f464aa900ce1d9f650f1da4a Mon Sep 17 00:00:00 2001
+From 2f0ffeffb907c53287cacd800c0b96b6242b57a3 Mon Sep 17 00:00:00 2001
 From: Fedora Kernel Team <kernel-team@fedoraproject.org>
-Date: Sat, 5 Nov 2016 16:18:45 -0400
-Subject: [PATCH] pf-kernel 4.8.6
+Date: Sun, 27 Nov 2016 14:01:47 -0500
+Subject: [PATCH] pf-kernel 4.8.10
 
 ---
  Documentation/block/00-INDEX                    |    2 +
@@ -10,14 +10,11 @@ Subject: [PATCH] pf-kernel 4.8.6
  Documentation/scheduler/sched-BFS.txt           |  351 +
  Documentation/scheduler/sched-MuQSS.txt         |  345 +
  Documentation/sysctl/kernel.txt                 |   26 +
- Makefile                                        |    6 +-
  arch/powerpc/platforms/cell/spufs/sched.c       |    5 -
  arch/x86/Kconfig                                |   30 +-
  arch/x86/Kconfig.cpu                            |  169 +-
  arch/x86/Makefile                               |   31 +-
  arch/x86/Makefile_32.cpu                        |   21 +-
- arch/x86/configs/i386_defconfig                 |    2 +-
- arch/x86/configs/x86_64_defconfig               |    2 +-
  arch/x86/include/asm/module.h                   |   34 +
  block/Kconfig                                   |    1 +
  block/Kconfig.iosched                           |   27 +
@@ -37,8 +34,6 @@ Subject: [PATCH] pf-kernel 4.8.6
  drivers/char/ipmi/ipmi_msghandler.c             |    2 +-
  drivers/char/ipmi/ipmi_ssif.c                   |    2 +-
  drivers/char/snsc.c                             |    4 +-
- drivers/cpufreq/cpufreq_conservative.c          |    6 +
- drivers/cpufreq/cpufreq_ondemand.c              |    5 +
  drivers/gpu/drm/i915/intel_i2c.c                |    2 +-
  drivers/gpu/drm/vmwgfx/vmwgfx_fifo.c            |    2 +-
  drivers/gpu/drm/vmwgfx/vmwgfx_irq.c             |    2 +-
@@ -102,7 +97,7 @@ Subject: [PATCH] pf-kernel 4.8.6
  include/linux/init_task.h                       |   75 +-
  include/linux/ioprio.h                          |    2 +
  include/linux/jiffies.h                         |    4 +
- include/linux/sched.h                           |   73 +-
+ include/linux/sched.h                           |   95 +-
  include/linux/sched/prio.h                      |   12 +
  include/linux/skip_list.h                       |   33 +
  include/linux/wbt.h                             |  141 +
@@ -111,13 +106,13 @@ Subject: [PATCH] pf-kernel 4.8.6
  include/uapi/linux/sched.h                      |    9 +-
  init/Kconfig                                    |   25 +-
  init/main.c                                     |    3 +-
- kernel/Kconfig.hz                               |    1 +
+ kernel/Kconfig.hz                               |   14 +-
  kernel/Kconfig.preempt                          |    7 +-
  kernel/Makefile                                 |    2 +-
  kernel/delayacct.c                              |    2 +-
  kernel/exit.c                                   |    2 +-
  kernel/sched/Makefile                           |   13 +-
- kernel/sched/MuQSS.c                            | 7888 ++++++++++++++++++++++
+ kernel/sched/MuQSS.c                            | 7890 ++++++++++++++++++++++
  kernel/sched/MuQSS.h                            |  343 +
  kernel/sched/cpufreq.c                          |    4 +
  kernel/sched/cpufreq_schedutil.c                |    4 +
@@ -127,11 +122,11 @@ Subject: [PATCH] pf-kernel 4.8.6
  kernel/sched/stats.c                            |    4 +
  kernel/skip_list.c                              |  148 +
  kernel/smpboot.c                                |    5 +-
- kernel/sysctl.c                                 |   42 +-
- kernel/time/clockevents.c                       |    5 +
- kernel/time/hrtimer.c                           |   62 +
+ kernel/sysctl.c                                 |   64 +-
+ kernel/time/clockevents.c                       |    6 +
+ kernel/time/hrtimer.c                           |  114 +
  kernel/time/posix-cpu-timers.c                  |   10 +-
- kernel/time/timer.c                             |   39 +-
+ kernel/time/timer.c                             |   48 +-
  kernel/trace/trace_selftest.c                   |    5 +
  lib/Kconfig                                     |    3 +
  lib/Kconfig.debug                               |    3 +-
@@ -149,7 +144,7 @@ Subject: [PATCH] pf-kernel 4.8.6
  sound/soc/codecs/wm9713.c                       |    4 +-
  sound/soc/soc-dapm.c                            |    2 +-
  sound/usb/line6/pcm.c                           |    2 +-
- 145 files changed, 20242 insertions(+), 196 deletions(-)
+ 140 files changed, 20345 insertions(+), 193 deletions(-)
  create mode 100644 Documentation/block/bfq-iosched.txt
  create mode 100644 Documentation/scheduler/sched-BFS.txt
  create mode 100644 Documentation/scheduler/sched-MuQSS.txt
@@ -1481,22 +1476,6 @@ index ffab8b5..01e0a4a 100644
  rtsig-max & rtsig-nr:
  
  The file rtsig-max can be used to tune the maximum number
-diff --git a/Makefile b/Makefile
-index f03e466..b568ee1 100644
---- a/Makefile
-+++ b/Makefile
-@@ -1,8 +1,8 @@
- VERSION = 4
- PATCHLEVEL = 8
--SUBLEVEL = 6
--EXTRAVERSION =
--NAME = Psychotic Stoned Sheep
-+SUBLEVEL = 0
-+EXTRAVERSION = -pf6
-+NAME = Wrong Language
- 
- # *DOCUMENTATION*
- # To see a list of typical targets execute "make help"
 diff --git a/arch/powerpc/platforms/cell/spufs/sched.c b/arch/powerpc/platforms/cell/spufs/sched.c
 index 460f5f3..eeb3e32 100644
 --- a/arch/powerpc/platforms/cell/spufs/sched.c
@@ -1919,32 +1898,6 @@ index 6647ed4..56aa88a 100644
  
  # AMD Elan support
  cflags-$(CONFIG_MELAN)		+= -march=i486
-diff --git a/arch/x86/configs/i386_defconfig b/arch/x86/configs/i386_defconfig
-index 5fa6ee2..824c48d 100644
---- a/arch/x86/configs/i386_defconfig
-+++ b/arch/x86/configs/i386_defconfig
-@@ -54,7 +54,7 @@ CONFIG_HIGHPTE=y
- CONFIG_X86_CHECK_BIOS_CORRUPTION=y
- # CONFIG_MTRR_SANITIZER is not set
- CONFIG_EFI=y
--CONFIG_HZ_1000=y
-+CONFIG_HZ_100=y
- CONFIG_KEXEC=y
- CONFIG_CRASH_DUMP=y
- # CONFIG_COMPAT_VDSO is not set
-diff --git a/arch/x86/configs/x86_64_defconfig b/arch/x86/configs/x86_64_defconfig
-index d28bdab..b8c4f66 100644
---- a/arch/x86/configs/x86_64_defconfig
-+++ b/arch/x86/configs/x86_64_defconfig
-@@ -52,7 +52,7 @@ CONFIG_NUMA=y
- CONFIG_X86_CHECK_BIOS_CORRUPTION=y
- # CONFIG_MTRR_SANITIZER is not set
- CONFIG_EFI=y
--CONFIG_HZ_1000=y
-+CONFIG_HZ_100=y
- CONFIG_KEXEC=y
- CONFIG_CRASH_DUMP=y
- # CONFIG_COMPAT_VDSO is not set
 diff --git a/arch/x86/include/asm/module.h b/arch/x86/include/asm/module.h
 index e3b7819..90f3c76 100644
 --- a/arch/x86/include/asm/module.h
@@ -11254,42 +11207,6 @@ index 94006f9..8078a74 100644
  
  		remove_wait_queue(&sd->sd_wq, &wait);
  		if (signal_pending(current)) {
-diff --git a/drivers/cpufreq/cpufreq_conservative.c b/drivers/cpufreq/cpufreq_conservative.c
-index 1347589..f40450d 100644
---- a/drivers/cpufreq/cpufreq_conservative.c
-+++ b/drivers/cpufreq/cpufreq_conservative.c
-@@ -31,8 +31,14 @@ struct cs_dbs_tuners {
- };
- 
- /* Conservative governor macros */
-+#ifdef CONFIG_SCHED_MUQSS
-+#define DEF_FREQUENCY_UP_THRESHOLD		(63)
-+#define DEF_FREQUENCY_DOWN_THRESHOLD		(26)
-+#else
- #define DEF_FREQUENCY_UP_THRESHOLD		(80)
- #define DEF_FREQUENCY_DOWN_THRESHOLD		(20)
-+#endif
-+
- #define DEF_FREQUENCY_STEP			(5)
- #define DEF_SAMPLING_DOWN_FACTOR		(1)
- #define MAX_SAMPLING_DOWN_FACTOR		(10)
-diff --git a/drivers/cpufreq/cpufreq_ondemand.c b/drivers/cpufreq/cpufreq_ondemand.c
-index 3a1f49f..73bb62c 100644
---- a/drivers/cpufreq/cpufreq_ondemand.c
-+++ b/drivers/cpufreq/cpufreq_ondemand.c
-@@ -20,7 +20,12 @@
- #include "cpufreq_ondemand.h"
- 
- /* On-demand governor macros */
-+#ifdef CONFIG_SCHED_MUQSS
-+#define DEF_FREQUENCY_UP_THRESHOLD		(63)
-+#else
- #define DEF_FREQUENCY_UP_THRESHOLD		(80)
-+#endif
-+
- #define DEF_SAMPLING_DOWN_FACTOR		(1)
- #define MAX_SAMPLING_DOWN_FACTOR		(100000)
- #define MICRO_FREQUENCY_UP_THRESHOLD		(95)
 diff --git a/drivers/gpu/drm/i915/intel_i2c.c b/drivers/gpu/drm/i915/intel_i2c.c
 index 1f266d7..9565702 100644
 --- a/drivers/gpu/drm/i915/intel_i2c.c
@@ -12017,7 +11934,7 @@ index a4ee65b..cf38bcb 100644
  	hwa742_set_update_mode(hwa742.update_mode_before_suspend);
  }
 diff --git a/drivers/video/fbdev/pxafb.c b/drivers/video/fbdev/pxafb.c
-index 2c0487f..022b8f4 100644
+index ed41fdb..ac27c30 100644
 --- a/drivers/video/fbdev/pxafb.c
 +++ b/drivers/video/fbdev/pxafb.c
 @@ -1287,7 +1287,7 @@ static int pxafb_smart_thread(void *arg)
@@ -12470,7 +12387,7 @@ index 5fdc553..893d5d1 100644
  /*
   * Change timeval to jiffies, trying to avoid the
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 62c68e5..3b8abf8 100644
+index 62c68e5..d9bff65 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -59,6 +59,7 @@ struct sched_param {
@@ -12499,20 +12416,42 @@ index 62c68e5..3b8abf8 100644
  #if defined(CONFIG_SMP) && defined(CONFIG_NO_HZ_COMMON)
  extern void nohz_balance_enter_idle(int cpu);
  extern void set_cpu_sd_state_idle(void);
-@@ -438,6 +437,12 @@ extern signed long schedule_timeout_interruptible(signed long timeout);
+@@ -438,6 +437,34 @@ extern signed long schedule_timeout_interruptible(signed long timeout);
  extern signed long schedule_timeout_killable(signed long timeout);
  extern signed long schedule_timeout_uninterruptible(signed long timeout);
  extern signed long schedule_timeout_idle(signed long timeout);
 +
++#ifdef CONFIG_HIGH_RES_TIMERS
 +extern signed long schedule_msec_hrtimeout(signed long timeout);
 +extern signed long schedule_min_hrtimeout(void);
 +extern signed long schedule_msec_hrtimeout_interruptible(signed long timeout);
 +extern signed long schedule_msec_hrtimeout_uninterruptible(signed long timeout);
++#else
++static inline signed long schedule_msec_hrtimeout(signed long timeout)
++{
++	return schedule_timeout(msecs_to_jiffies(timeout));
++}
++
++static inline signed long schedule_min_hrtimeout(void)
++{
++	return schedule_timeout(1);
++}
++
++static inline signed long schedule_msec_hrtimeout_interruptible(signed long timeout)
++{
++	return schedule_timeout_interruptible(msecs_to_jiffies(timeout));
++}
++
++static inline signed long schedule_msec_hrtimeout_uninterruptible(signed long timeout)
++{
++	return schedule_timeout_uninterruptible(msecs_to_jiffies(timeout));
++}
++#endif
 +
  asmlinkage void schedule(void);
  extern void schedule_preempt_disabled(void);
  
-@@ -1464,9 +1469,11 @@ struct task_struct {
+@@ -1464,9 +1491,11 @@ struct task_struct {
  	unsigned int flags;	/* per process flags, defined below */
  	unsigned int ptrace;
  
@@ -12525,7 +12464,7 @@ index 62c68e5..3b8abf8 100644
  	unsigned int wakee_flips;
  	unsigned long wakee_flip_decay_ts;
  	struct task_struct *last_wakee;
-@@ -1474,12 +1481,26 @@ struct task_struct {
+@@ -1474,12 +1503,26 @@ struct task_struct {
  	int wake_cpu;
  #endif
  	int on_rq;
@@ -12553,7 +12492,7 @@ index 62c68e5..3b8abf8 100644
  #ifdef CONFIG_CGROUP_SCHED
  	struct task_group *sched_task_group;
  #endif
-@@ -1603,6 +1624,10 @@ struct task_struct {
+@@ -1603,6 +1646,10 @@ struct task_struct {
  	int __user *clear_child_tid;		/* CLONE_CHILD_CLEARTID */
  
  	cputime_t utime, stime, utimescaled, stimescaled;
@@ -12564,7 +12503,7 @@ index 62c68e5..3b8abf8 100644
  	cputime_t gtime;
  	struct prev_cputime prev_cputime;
  #ifdef CONFIG_VIRT_CPU_ACCOUNTING_GEN
-@@ -1939,6 +1964,40 @@ extern int arch_task_struct_size __read_mostly;
+@@ -1939,6 +1986,40 @@ extern int arch_task_struct_size __read_mostly;
  # define arch_task_struct_size (sizeof(struct task_struct))
  #endif
  
@@ -12605,7 +12544,7 @@ index 62c68e5..3b8abf8 100644
  /* Future-safe accessor for struct task_struct's cpus_allowed. */
  #define tsk_cpus_allowed(tsk) (&(tsk)->cpus_allowed)
  
-@@ -2392,7 +2451,7 @@ static inline int set_cpus_allowed_ptr(struct task_struct *p,
+@@ -2392,7 +2473,7 @@ static inline int set_cpus_allowed_ptr(struct task_struct *p,
  }
  #endif
  
@@ -12614,7 +12553,7 @@ index 62c68e5..3b8abf8 100644
  void calc_load_enter_idle(void);
  void calc_load_exit_idle(void);
  #else
-@@ -2493,7 +2552,7 @@ extern unsigned long long
+@@ -2493,7 +2574,7 @@ extern unsigned long long
  task_sched_runtime(struct task_struct *task);
  
  /* sched_exec is called by processes performing an exec */
@@ -13130,17 +13069,44 @@ index a8a58e2..76a2d14 100644
  		ret = run_init_process(ramdisk_execute_command);
  		if (!ret)
 diff --git a/kernel/Kconfig.hz b/kernel/Kconfig.hz
-index 2a202a8..ecde22d 100644
+index 2a202a8..1532e4e 100644
 --- a/kernel/Kconfig.hz
 +++ b/kernel/Kconfig.hz
-@@ -5,6 +5,7 @@
+@@ -4,7 +4,8 @@
+ 
  choice
  	prompt "Timer frequency"
- 	default HZ_250
-+	default HZ_100 if SCHED_MUQSS
+-	default HZ_250
++	default HZ_128 if SCHED_MUQSS
++	default HZ_250 if !SCHED_MUQSS
  	help
  	 Allows the configuration of the timer frequency. It is customary
  	 to have the timer interrupt run at 1000 Hz but 100 Hz may be more
+@@ -23,6 +24,16 @@ choice
+ 	  with lots of processors that may show reduced performance if
+ 	  too many timer interrupts are occurring.
+ 
++	config HZ_128
++		bool "128 HZ"
++	help
++	  128 Hz is a suitable choice in combination with MuQSS which does
++	  not rely on ticks for rescheduling interrupts, and is not Hz limited
++	  for timeouts and sleeps from both the kernel and userspace.
++	  This allows us to benefit from the lower overhead and higher
++	  throughput of fewer timer ticks and the microoptimisation of Hz
++	  divisions being a power of 2.
++
+ 	config HZ_250
+ 		bool "250 HZ"
+ 	help
+@@ -50,6 +61,7 @@ endchoice
+ config HZ
+ 	int
+ 	default 100 if HZ_100
++	default 128 if HZ_128
+ 	default 250 if HZ_250
+ 	default 300 if HZ_300
+ 	default 1000 if HZ_1000
 diff --git a/kernel/Kconfig.preempt b/kernel/Kconfig.preempt
 index 3f9c974..1dc79ec 100644
 --- a/kernel/Kconfig.preempt
@@ -13241,10 +13207,10 @@ index 5e59b83..77bdf98 100644
  obj-$(CONFIG_CPU_FREQ_GOV_SCHEDUTIL) += cpufreq_schedutil.o
 diff --git a/kernel/sched/MuQSS.c b/kernel/sched/MuQSS.c
 new file mode 100644
-index 0000000..a8480fc
+index 0000000..c2f04da
 --- /dev/null
 +++ b/kernel/sched/MuQSS.c
-@@ -0,0 +1,7888 @@
+@@ -0,0 +1,7890 @@
 +/*
 + *  kernel/sched/MuQSS.c, was kernel/sched.c
 + *
@@ -13384,7 +13350,7 @@ index 0000000..a8480fc
 +
 +void print_scheduler_version(void)
 +{
-+	printk(KERN_INFO "MuQSS CPU scheduler v0.135 by Con Kolivas.\n");
++	printk(KERN_INFO "MuQSS CPU scheduler v0.144 by Con Kolivas.\n");
 +}
 +
 +/*
@@ -15596,6 +15562,76 @@ index 0000000..a8480fc
 +	p->last_ran = rq->niffies;
 +}
 +
++static inline int hrexpiry_enabled(struct rq *rq)
++{
++	if (unlikely(!cpu_active(cpu_of(rq)) || !sched_smp_initialized))
++		return 0;
++	return hrtimer_is_hres_active(&rq->hrexpiry_timer);
++}
++
++/*
++ * Use HR-timers to deliver accurate preemption points.
++ */
++static inline void hrexpiry_clear(struct rq *rq)
++{
++	if (!hrexpiry_enabled(rq))
++		return;
++	if (hrtimer_active(&rq->hrexpiry_timer))
++		hrtimer_cancel(&rq->hrexpiry_timer);
++}
++
++/*
++ * High-resolution time_slice expiry.
++ * Runs from hardirq context with interrupts disabled.
++ */
++static enum hrtimer_restart hrexpiry(struct hrtimer *timer)
++{
++	struct rq *rq = container_of(timer, struct rq, hrexpiry_timer);
++	struct task_struct *p;
++
++	/* This can happen during CPU hotplug / resume */
++	if (unlikely(cpu_of(rq) != smp_processor_id()))
++		goto out;
++
++	/*
++	 * We're doing this without the runqueue lock but this should always
++	 * be run on the local CPU. Time slice should run out in __schedule
++	 * but we set it to zero here in case niffies is slightly less.
++	 */
++	p = rq->curr;
++	p->time_slice = 0;
++	__set_tsk_resched(p);
++out:
++	return HRTIMER_NORESTART;
++}
++
++/*
++ * Called to set the hrexpiry timer state.
++ *
++ * called with irqs disabled from the local CPU only
++ */
++static void hrexpiry_start(struct rq *rq, u64 delay)
++{
++	if (!hrexpiry_enabled(rq))
++		return;
++
++	hrtimer_start(&rq->hrexpiry_timer, ns_to_ktime(delay),
++		      HRTIMER_MODE_REL_PINNED);
++}
++
++static void init_rq_hrexpiry(struct rq *rq)
++{
++	hrtimer_init(&rq->hrexpiry_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
++	rq->hrexpiry_timer.function = hrexpiry;
++}
++
++static inline int rq_dither(struct rq *rq)
++{
++	if (!hrexpiry_enabled(rq))
++		return HALF_JIFFY_US;
++	return 0;
++}
++
 +/*
 + * wake_up_new_task - wake up a newly created task for the first time.
 + *
@@ -15664,8 +15700,14 @@ index 0000000..a8480fc
 +				 * usually avoids a lot of COW overhead.
 +				 */
 +				__set_tsk_resched(rq_curr);
-+			} else
++			} else {
++				/*
++				 * Adjust the hrexpiry since rq_curr will keep
++				 * running and its timeslice has been shortened.
++				 */
++				hrexpiry_start(rq, US_TO_NS(rq_curr->time_slice));
 +				try_preempt(p, new_rq);
++			}
 +		}
 +	} else {
 +		time_slice_expired(p, new_rq);
@@ -16347,87 +16389,6 @@ index 0000000..a8480fc
 +	return ns;
 +}
 +
-+#ifdef CONFIG_HIGH_RES_TIMERS
-+static inline int hrexpiry_enabled(struct rq *rq)
-+{
-+	if (unlikely(!cpu_active(cpu_of(rq)) || !sched_smp_initialized))
-+		return 0;
-+	return hrtimer_is_hres_active(&rq->hrexpiry_timer);
-+}
-+
-+/*
-+ * Use HR-timers to deliver accurate preemption points.
-+ */
-+static void hrexpiry_clear(struct rq *rq)
-+{
-+	if (!hrexpiry_enabled(rq))
-+		return;
-+	if (hrtimer_active(&rq->hrexpiry_timer))
-+		hrtimer_cancel(&rq->hrexpiry_timer);
-+}
-+
-+/*
-+ * High-resolution time_slice expiry.
-+ * Runs from hardirq context with interrupts disabled.
-+ */
-+static enum hrtimer_restart hrexpiry(struct hrtimer *timer)
-+{
-+	struct rq *rq = container_of(timer, struct rq, hrexpiry_timer);
-+	struct task_struct *p;
-+
-+	/* This can happen during CPU hotplug / resume */
-+	if (unlikely(cpu_of(rq) != smp_processor_id()))
-+		goto out;
-+
-+	/*
-+	 * We're doing this without the runqueue lock but this should always
-+	 * be run on the local CPU. Time slice should run out in __schedule
-+	 * but we set it to zero here in case niffies is slightly less.
-+	 */
-+	p = rq->curr;
-+	p->time_slice = 0;
-+	__set_tsk_resched(p);
-+out:
-+	return HRTIMER_NORESTART;
-+}
-+
-+/*
-+ * Called to set the hrexpiry timer state.
-+ *
-+ * called with irqs disabled from the local CPU only
-+ */
-+static void hrexpiry_start(struct rq *rq, u64 delay)
-+{
-+	if (!hrexpiry_enabled(rq))
-+		return;
-+
-+	hrtimer_start(&rq->hrexpiry_timer, ns_to_ktime(delay),
-+		      HRTIMER_MODE_REL_PINNED);
-+}
-+
-+static void init_rq_hrexpiry(struct rq *rq)
-+{
-+	hrtimer_init(&rq->hrexpiry_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-+	rq->hrexpiry_timer.function = hrexpiry;
-+}
-+
-+static inline int rq_dither(struct rq *rq)
-+{
-+	if (!hrexpiry_enabled(rq))
-+		return HALF_JIFFY_US;
-+	return 0;
-+}
-+#else /* CONFIG_HIGH_RES_TIMERS */
-+static inline void init_rq_hrexpiry(struct rq *rq)
-+{
-+}
-+
-+static inline int rq_dither(struct rq *rq)
-+{
-+	return HALF_JIFFY_US;
-+}
-+#endif /* CONFIG_HIGH_RES_TIMERS */
-+
 +/*
 + * Functions to test for when SCHED_ISO tasks have used their allocated
 + * quota as real time scheduling and convert them back to SCHED_NORMAL. All
@@ -16730,16 +16691,15 @@ index 0000000..a8480fc
 +static inline struct task_struct
 +*earliest_deadline_task(struct rq *rq, int cpu, struct task_struct *idle)
 +{
++	struct rq *locked = NULL, *chosen = NULL;
 +	struct task_struct *edt = idle;
-+	struct rq *locked = NULL;
 +	int i, best_entries = 0;
 +	u64 best_key = ~0ULL;
 +
 +	for (i = 0; i < num_possible_cpus(); i++) {
 +		struct rq *other_rq = rq_order(rq, i);
 +		int entries = other_rq->sl->entries;
-+		struct task_struct *p;
-+		u64 key;
++		skiplist_node *next;
 +
 +		/*
 +		 * Check for queued entres lockless first. The local runqueue
@@ -16773,35 +16733,47 @@ index 0000000..a8480fc
 +				continue;
 +			}
 +		}
-+		key = other_rq->node.next[0]->key;
-+		/* Reevaluate key after locking */
-+		if (unlikely(key >= best_key)) {
-+			/* This will always be when rq != other_rq */
-+			unlock_rq(other_rq);
-+			continue;
-+		}
 +
-+		p = other_rq->node.next[0]->value;
-+		if (!smt_schedule(p, rq)) {
-+			if (i)
-+				unlock_rq(other_rq);
-+			continue;
-+		}
++		next = &other_rq->node;
++		/*
++		 * In interactive mode we check beyond the best entry on other
++		 * runqueues if we can't get the best for smt or affinity
++		 * reasons.
++		 */
++		while ((next = next->next[0]) != &other_rq->node) {
++			struct task_struct *p;
++			u64 key = next->key;
 +
-+		/* Make sure affinity is ok */
-+		if (i) {
-+			if (needs_other_cpu(p, cpu)) {
-+				unlock_rq(other_rq);
++			/* Reevaluate key after locking */
++			if (key >= best_key)
++				break;
++
++			p = next->value;
++			if (!smt_schedule(p, rq)) {
++				if (i && !sched_interactive)
++					break;
 +				continue;
 +			}
-+			if (locked)
-+				unlock_rq(locked);
-+			locked = other_rq;
-+		}
 +
-+		best_entries = entries;
-+		best_key = key;
-+		edt = p;
++			/* Make sure affinity is ok */
++			if (i) {
++				if (needs_other_cpu(p, cpu)) {
++					if (sched_interactive)
++						continue;
++					break;
++				}
++				/* From this point on p is the best so far */
++				if (locked)
++					unlock_rq(locked);
++				chosen = locked = other_rq;
++			}
++			best_entries = entries;
++			best_key = key;
++			edt = p;
++			break;
++		}
++		if (i && other_rq != chosen)
++			unlock_rq(other_rq);
 +	}
 +
 +	if (likely(edt != idle))
@@ -16879,12 +16851,10 @@ index 0000000..a8480fc
 + */
 +static inline void set_rq_task(struct rq *rq, struct task_struct *p)
 +{
-+#ifdef CONFIG_HIGH_RES_TIMERS
 +	if (p == rq->idle || p->policy == SCHED_FIFO)
 +		hrexpiry_clear(rq);
 +	else
 +		hrexpiry_start(rq, US_TO_NS(p->time_slice));
-+#endif /* CONFIG_HIGH_RES_TIMERS */
 +	if (rq->clock - rq->last_tick > HALF_JIFFY_NS)
 +		rq->dither = 0;
 +	else
@@ -18109,13 +18079,11 @@ index 0000000..a8480fc
 +	struct task_struct *p;
 +	int retval;
 +
-+	get_online_cpus();
 +	rcu_read_lock();
 +
 +	p = find_process_by_pid(pid);
 +	if (!p) {
 +		rcu_read_unlock();
-+		put_online_cpus();
 +		return -ESRCH;
 +	}
 +
@@ -18172,7 +18140,6 @@ index 0000000..a8480fc
 +	free_cpumask_var(cpus_allowed);
 +out_put_task:
 +	put_task_struct(p);
-+	put_online_cpus();
 +	return retval;
 +}
 +
@@ -18766,6 +18733,7 @@ index 0000000..a8480fc
 +	init_idle_preempt_count(idle, cpu);
 +
 +	ftrace_graph_init_idle_task(idle, cpu);
++	vtime_init_idle(idle, cpu);
 +#ifdef CONFIG_SMP
 +	sprintf(idle->comm, "%s/%d", INIT_TASK_COMM, cpu);
 +#endif
@@ -18932,16 +18900,16 @@ index 0000000..a8480fc
 +				  const struct cpumask *new_mask, bool check)
 +{
 +	const struct cpumask *cpu_valid_mask = cpu_active_mask;
-+	bool running_wrong = false;
++	bool queued = false, running_wrong = false, kthread;
 +	struct cpumask old_mask;
-+	bool queued = false;
 +	unsigned long flags;
 +	struct rq *rq;
 +	int ret = 0;
 +
 +	rq = task_rq_lock(p, &flags);
 +
-+	if (p->flags & PF_KTHREAD) {
++	kthread = !!(p->flags & PF_KTHREAD);
++	if (kthread) {
 +		/*
 +		 * Kernel threads are allowed on online && !active CPUs
 +		 */
@@ -18970,7 +18938,7 @@ index 0000000..a8480fc
 +
 +	_do_set_cpus_allowed(p, new_mask);
 +
-+	if (p->flags & PF_KTHREAD) {
++	if (kthread) {
 +		/*
 +		 * For kernel threads that do indeed end up on online &&
 +		 * !active we want to ensure they are strict per-cpu threads.
@@ -18988,7 +18956,7 @@ index 0000000..a8480fc
 +		/* Task is running on the wrong cpu now, reschedule it. */
 +		if (rq == this_rq()) {
 +			set_tsk_need_resched(p);
-+			running_wrong = true;
++			running_wrong = kthread;
 +		} else
 +			resched_task(p);
 +	} else {
@@ -21791,26 +21759,30 @@ index 13bc43d..4903e53 100644
  			/* We might have been woken for stop */
  			continue;
 diff --git a/kernel/sysctl.c b/kernel/sysctl.c
-index a13bbda..4bd1859 100644
+index a13bbda..5cf0034 100644
 --- a/kernel/sysctl.c
 +++ b/kernel/sysctl.c
-@@ -125,8 +125,13 @@ static int __maybe_unused one = 1;
+@@ -125,9 +125,16 @@ static int __maybe_unused one = 1;
  static int __maybe_unused two = 2;
  static int __maybe_unused four = 4;
  static unsigned long one_ul = 1;
 -static int one_hundred = 100;
 -static int one_thousand = 1000;
+-#ifdef CONFIG_PRINTK
 +static int __read_mostly one_hundred = 100;
 +static int __read_mostly one_thousand = 1000;
 +#ifdef CONFIG_SCHED_MUQSS
 +extern int rr_interval;
 +extern int sched_interactive;
 +extern int sched_iso_cpu;
++extern int hrtimer_granularity_us;
++extern int hrtimeout_min_us;
 +#endif
- #ifdef CONFIG_PRINTK
++#if defined(CONFIG_PRINTK) || defined(CONFIG_SCHED_MUQSS)
  static int ten_thousand = 10000;
  #endif
-@@ -264,7 +269,7 @@ static struct ctl_table sysctl_base_table[] = {
+ #ifdef CONFIG_PERF_EVENTS
+@@ -264,7 +271,7 @@ static struct ctl_table sysctl_base_table[] = {
  	{ }
  };
  
@@ -21819,7 +21791,7 @@ index a13bbda..4bd1859 100644
  static int min_sched_granularity_ns = 100000;		/* 100 usecs */
  static int max_sched_granularity_ns = NSEC_PER_SEC;	/* 1 second */
  static int min_wakeup_granularity_ns;			/* 0 usecs */
-@@ -281,6 +286,7 @@ static int max_extfrag_threshold = 1000;
+@@ -281,6 +288,7 @@ static int max_extfrag_threshold = 1000;
  #endif
  
  static struct ctl_table kern_table[] = {
@@ -21827,7 +21799,7 @@ index a13bbda..4bd1859 100644
  	{
  		.procname	= "sched_child_runs_first",
  		.data		= &sysctl_sched_child_runs_first,
-@@ -449,6 +455,7 @@ static struct ctl_table kern_table[] = {
+@@ -449,6 +457,7 @@ static struct ctl_table kern_table[] = {
  		.extra1		= &one,
  	},
  #endif
@@ -21835,7 +21807,7 @@ index a13bbda..4bd1859 100644
  #ifdef CONFIG_PROVE_LOCKING
  	{
  		.procname	= "prove_locking",
-@@ -1013,6 +1020,35 @@ static struct ctl_table kern_table[] = {
+@@ -1013,6 +1022,53 @@ static struct ctl_table kern_table[] = {
  		.proc_handler	= proc_dointvec,
  	},
  #endif
@@ -21867,21 +21839,40 @@ index a13bbda..4bd1859 100644
 +		.extra1		= &zero,
 +		.extra2		= &one_hundred,
 +	},
++	{
++		.procname	= "hrtimer_granularity_us",
++		.data		= &hrtimer_granularity_us,
++		.maxlen		= sizeof(int),
++		.mode		= 0644,
++		.proc_handler	= &proc_dointvec_minmax,
++		.extra1		= &one,
++		.extra2		= &ten_thousand,
++	},
++	{
++		.procname	= "hrtimeout_min_us",
++		.data		= &hrtimeout_min_us,
++		.maxlen		= sizeof(int),
++		.mode		= 0644,
++		.proc_handler	= &proc_dointvec_minmax,
++		.extra1		= &one,
++		.extra2		= &ten_thousand,
++	},
 +#endif
  #if defined(CONFIG_S390) && defined(CONFIG_SMP)
  	{
  		.procname	= "spin_retry",
 diff --git a/kernel/time/clockevents.c b/kernel/time/clockevents.c
-index 2c5bc77..b96deed 100644
+index 2c5bc77..2816961 100644
 --- a/kernel/time/clockevents.c
 +++ b/kernel/time/clockevents.c
-@@ -198,8 +198,13 @@ int clockevents_tick_resume(struct clock_event_device *dev)
+@@ -198,8 +198,14 @@ int clockevents_tick_resume(struct clock_event_device *dev)
  
  #ifdef CONFIG_GENERIC_CLOCKEVENTS_MIN_ADJUST
  
 +#ifdef CONFIG_SCHED_MUQSS
++int __read_mostly hrtimer_granularity_us = 100;
 +/* Limit min_delta to 100us */
-+#define MIN_DELTA_LIMIT		(NSEC_PER_SEC / 10000)
++#define MIN_DELTA_LIMIT		(hrtimer_granularity_us * NSEC_PER_USEC)
 +#else
  /* Limit min_delta to a jiffie */
  #define MIN_DELTA_LIMIT		(NSEC_PER_SEC / HZ)
@@ -21890,10 +21881,10 @@ index 2c5bc77..b96deed 100644
  /**
   * clockevents_increase_min_delta - raise minimum delta of a clock event device
 diff --git a/kernel/time/hrtimer.c b/kernel/time/hrtimer.c
-index 9ba7c82..53291d7 100644
+index 9ba7c82..1acbaa6 100644
 --- a/kernel/time/hrtimer.c
 +++ b/kernel/time/hrtimer.c
-@@ -1788,3 +1788,65 @@ int __sched schedule_hrtimeout(ktime_t *expires,
+@@ -1788,3 +1788,117 @@ int __sched schedule_hrtimeout(ktime_t *expires,
  	return schedule_hrtimeout_range(expires, 0, mode);
  }
  EXPORT_SYMBOL_GPL(schedule_hrtimeout);
@@ -21905,17 +21896,25 @@ index 9ba7c82..53291d7 100644
 +signed long __sched schedule_msec_hrtimeout(signed long timeout)
 +{
 +	struct hrtimer_sleeper t;
++	int delta, jiffs;
 +	ktime_t expires;
-+	int delta, secs;
 +
 +	if (!timeout) {
 +		__set_current_state(TASK_RUNNING);
 +		return 0;
 +	}
 +
-+	secs = timeout / 1000;
++	jiffs = msecs_to_jiffies(timeout);
++	/*
++	 * If regular timer resolution is adequate or hrtimer resolution is not
++	 * (yet) better than Hz, as would occur during startup, use regular
++	 * timers.
++	 */
++	if (jiffs > 4 || hrtimer_resolution >= NSEC_PER_SEC / HZ)
++		return schedule_timeout(jiffs);
++
 +	delta = (timeout % 1000) * NSEC_PER_MSEC;
-+	expires = ktime_set(secs, delta);
++	expires = ktime_set(0, delta);
 +
 +	hrtimer_init_on_stack(&t.timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 +	hrtimer_set_expires_range_ns(&t.timer, expires, delta);
@@ -21939,9 +21938,53 @@ index 9ba7c82..53291d7 100644
 +
 +EXPORT_SYMBOL(schedule_msec_hrtimeout);
 +
++#define USECS_PER_SEC 1000000
++extern int hrtimer_granularity_us;
++
++static inline signed long schedule_usec_hrtimeout(signed long timeout)
++{
++	struct hrtimer_sleeper t;
++	ktime_t expires;
++	int delta;
++
++	if (!timeout) {
++		__set_current_state(TASK_RUNNING);
++		return 0;
++	}
++
++	if (hrtimer_resolution >= NSEC_PER_SEC / HZ)
++		return schedule_timeout(usecs_to_jiffies(timeout));
++
++	if (timeout < hrtimer_granularity_us)
++		timeout = hrtimer_granularity_us;
++	delta = (timeout % USECS_PER_SEC) * NSEC_PER_USEC;
++	expires = ktime_set(0, delta);
++
++	hrtimer_init_on_stack(&t.timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
++	hrtimer_set_expires_range_ns(&t.timer, expires, delta);
++
++	hrtimer_init_sleeper(&t, current);
++
++	hrtimer_start_expires(&t.timer, HRTIMER_MODE_REL);
++
++	if (likely(t.task))
++		schedule();
++
++	hrtimer_cancel(&t.timer);
++	destroy_hrtimer_on_stack(&t.timer);
++
++	__set_current_state(TASK_RUNNING);
++
++	expires = hrtimer_expires_remaining(&t.timer);
++	timeout = ktime_to_us(expires);
++	return timeout < 0 ? 0 : timeout;
++}
++
++int __read_mostly hrtimeout_min_us = 1000;
++
 +signed long __sched schedule_min_hrtimeout(void)
 +{
-+	return schedule_msec_hrtimeout(1);
++	return usecs_to_jiffies(schedule_usec_hrtimeout(hrtimeout_min_us));
 +}
 +
 +EXPORT_SYMBOL(schedule_min_hrtimeout);
@@ -22009,10 +22052,10 @@ index 39008d7..784f3a1 100644
  			return 1;
  	}
 diff --git a/kernel/time/timer.c b/kernel/time/timer.c
-index 32bf6f7..7651d47 100644
+index 96db64b..6475815 100644
 --- a/kernel/time/timer.c
 +++ b/kernel/time/timer.c
-@@ -1454,7 +1454,7 @@ static unsigned long __next_timer_interrupt(struct timer_base *base)
+@@ -1464,7 +1464,7 @@ static unsigned long __next_timer_interrupt(struct timer_base *base)
   * Check, if the next hrtimer event is before the next timer wheel
   * event:
   */
@@ -22021,7 +22064,7 @@ index 32bf6f7..7651d47 100644
  {
  	u64 nextevt = hrtimer_get_next_event();
  
-@@ -1472,6 +1472,9 @@ static u64 cmp_next_hrtimer_event(u64 basem, u64 expires)
+@@ -1482,6 +1482,9 @@ static u64 cmp_next_hrtimer_event(u64 basem, u64 expires)
  	if (nextevt <= basem)
  		return basem;
  
@@ -22031,7 +22074,7 @@ index 32bf6f7..7651d47 100644
  	/*
  	 * Round up to the next jiffie. High resolution timers are
  	 * off, so the hrtimers are expired in the tick and we need to
-@@ -1531,7 +1534,7 @@ u64 get_next_timer_interrupt(unsigned long basej, u64 basem)
+@@ -1545,7 +1548,7 @@ u64 get_next_timer_interrupt(unsigned long basej, u64 basem)
  	}
  	spin_unlock(&base->lock);
  
@@ -22040,10 +22083,11 @@ index 32bf6f7..7651d47 100644
  }
  
  /**
-@@ -1742,6 +1745,17 @@ signed long __sched schedule_timeout(signed long timeout)
+@@ -1756,6 +1759,19 @@ signed long __sched schedule_timeout(signed long timeout)
  
  	expire = timeout + jiffies;
  
++#ifdef CONFIG_HIGH_RES_TIMERS
 +	if (timeout == 1 && hrtimer_resolution < NSEC_PER_SEC / HZ) {
 +		/*
 +		 * Special case 1 as being a request for the minimum timeout
@@ -22054,11 +22098,12 @@ index 32bf6f7..7651d47 100644
 +			return 0;
 +		goto out_timeout;
 +	}
++#endif
 +
  	setup_timer_on_stack(&timer, process_timeout, (unsigned long)current);
  	__mod_timer(&timer, expire, false);
  	schedule();
-@@ -1749,10 +1763,10 @@ signed long __sched schedule_timeout(signed long timeout)
+@@ -1763,10 +1779,10 @@ signed long __sched schedule_timeout(signed long timeout)
  
  	/* Remove the timer from the object tracker */
  	destroy_timer_on_stack(&timer);
@@ -22071,29 +22116,36 @@ index 32bf6f7..7651d47 100644
  	return timeout < 0 ? 0 : timeout;
  }
  EXPORT_SYMBOL(schedule_timeout);
-@@ -1873,7 +1887,13 @@ void __init init_timers(void)
+@@ -1887,7 +1903,19 @@ void __init init_timers(void)
   */
  void msleep(unsigned int msecs)
  {
 -	unsigned long timeout = msecs_to_jiffies(msecs) + 1;
++	int jiffs = msecs_to_jiffies(msecs);
 +	unsigned long timeout;
 +
-+	if (likely(hrtimer_resolution < NSEC_PER_SEC / HZ)) {
++	/*
++	 * Use high resolution timers where the resolution of tick based
++	 * timers is inadequate.
++	 */
++	if (jiffs < 5 && hrtimer_resolution < NSEC_PER_SEC / HZ) {
 +		while (msecs)
 +			msecs = schedule_msec_hrtimeout_uninterruptible(msecs);
++		return;
 +	}
 +	timeout = msecs_to_jiffies(msecs) + 1;
  
  	while (timeout)
  		timeout = schedule_timeout_uninterruptible(timeout);
-@@ -1887,7 +1907,14 @@ EXPORT_SYMBOL(msleep);
+@@ -1901,7 +1929,15 @@ EXPORT_SYMBOL(msleep);
   */
  unsigned long msleep_interruptible(unsigned int msecs)
  {
 -	unsigned long timeout = msecs_to_jiffies(msecs) + 1;
++	int jiffs = msecs_to_jiffies(msecs);
 +	unsigned long timeout;
 +
-+	if (likely(hrtimer_resolution < NSEC_PER_SEC / HZ)) {
++	if (jiffs < 5 && hrtimer_resolution < NSEC_PER_SEC / HZ) {
 +		while (msecs && !signal_pending(current))
 +			msecs = schedule_msec_hrtimeout_interruptible(msecs);
 +		return msecs;
@@ -22901,7 +22953,7 @@ index f4cd7d8..98bc3fc 100644
  
  		current->dirty_paused_when = now + pause;
 diff --git a/net/core/pktgen.c b/net/core/pktgen.c
-index bbd118b..80d4e11 100644
+index 306b8f0..4f4ab3d 100644
 --- a/net/core/pktgen.c
 +++ b/net/core/pktgen.c
 @@ -1992,7 +1992,7 @@ static void pktgen_mark_device(const struct pktgen_net *pn, const char *ifname)
