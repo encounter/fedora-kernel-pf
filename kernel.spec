@@ -644,7 +644,7 @@ Patch854: nouveau-add-maxwell-to-backlight-init.patch
 Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.6.patch
+Patch999: pf-kernel-4.8.10.patch
 
 # END OF PATCH DEFINITIONS
 
