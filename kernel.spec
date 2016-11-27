@@ -636,7 +636,7 @@ Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
 Patch854: nouveau-add-maxwell-to-backlight-init.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.7.10.patch
+Patch999: pf-kernel-4.8.10.patch
 
 # END OF PATCH DEFINITIONS
 
