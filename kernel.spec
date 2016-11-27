@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -635,7 +635,7 @@ Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
 #rhbz 1392885
-Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
+#Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
 
 #rhbz 1390308
 Patch854: nouveau-add-maxwell-to-backlight-init.patch
@@ -644,7 +644,7 @@ Patch854: nouveau-add-maxwell-to-backlight-init.patch
 Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.10.patch
+Patch999: pf-kernel-4.8.11.patch
 
 # END OF PATCH DEFINITIONS
 
