@@ -655,7 +655,7 @@ Patch858: 0001-net-avoid-signed-overflows-for-SO_-SND-RCV-BUFFORCE.patch
 Patch859: 0001-Don-t-feed-anything-but-regular-iovec-s-to-blk_rq_ma.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.11.patch
+Patch999: pf-kernel-4.8.13.patch
 
 # END OF PATCH DEFINITIONS
 
