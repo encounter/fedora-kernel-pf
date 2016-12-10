@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -647,7 +647,7 @@ Patch858: 0001-net-avoid-signed-overflows-for-SO_-SND-RCV-BUFFORCE.patch
 Patch859: 0001-Don-t-feed-anything-but-regular-iovec-s-to-blk_rq_ma.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.10.patch
+Patch999: pf-kernel-4.8.13.patch
 
 # END OF PATCH DEFINITIONS
 
