@@ -1,7 +1,7 @@
-From 12d96ab453163636a866f89ae1277e11fd3f3690 Mon Sep 17 00:00:00 2001
+From bca2f2ca6c18897eccd43540ba5b7059fcaf3167 Mon Sep 17 00:00:00 2001
 From: Fedora Kernel Team <kernel-team@fedoraproject.org>
-Date: Sat, 10 Dec 2016 01:06:15 -0500
-Subject: [PATCH] pf-kernel 4.8.13
+Date: Thu, 22 Dec 2016 01:59:36 -0500
+Subject: [PATCH] pf-kernel 4.8.15
 
 ---
  Documentation/block/00-INDEX                    |    2 +
@@ -10,7 +10,6 @@ Subject: [PATCH] pf-kernel 4.8.13
  Documentation/scheduler/sched-BFS.txt           |  351 +
  Documentation/scheduler/sched-MuQSS.txt         |  345 +
  Documentation/sysctl/kernel.txt                 |   26 +
- Makefile                                        |    6 +-
  arch/powerpc/platforms/cell/spufs/sched.c       |    5 -
  arch/x86/Kconfig                                |   30 +-
  arch/x86/Kconfig.cpu                            |  169 +-
@@ -26,7 +25,7 @@ Subject: [PATCH] pf-kernel 4.8.13
  block/blk-mq.c                                  |   40 +-
  block/blk-mq.h                                  |    3 +
  block/blk-settings.c                            |   15 +
- block/blk-stat.c                                |  221 +
+ block/blk-stat.c                                |  229 +
  block/blk-stat.h                                |   18 +
  block/blk-sysfs.c                               |  151 +
  block/cfq-iosched.c                             |   13 +
@@ -145,7 +144,7 @@ Subject: [PATCH] pf-kernel 4.8.13
  sound/soc/codecs/wm9713.c                       |    4 +-
  sound/soc/soc-dapm.c                            |    2 +-
  sound/usb/line6/pcm.c                           |    2 +-
- 141 files changed, 20348 insertions(+), 196 deletions(-)
+ 140 files changed, 20353 insertions(+), 193 deletions(-)
  create mode 100644 Documentation/block/bfq-iosched.txt
  create mode 100644 Documentation/scheduler/sched-BFS.txt
  create mode 100644 Documentation/scheduler/sched-MuQSS.txt
@@ -1477,22 +1476,6 @@ index ffab8b5..01e0a4a 100644
  rtsig-max & rtsig-nr:
  
  The file rtsig-max can be used to tune the maximum number
-diff --git a/Makefile b/Makefile
-index 2f58544..d1aa03c 100644
---- a/Makefile
-+++ b/Makefile
-@@ -1,8 +1,8 @@
- VERSION = 4
- PATCHLEVEL = 8
--SUBLEVEL = 13
--EXTRAVERSION =
--NAME = Psychotic Stoned Sheep
-+SUBLEVEL = 0
-+EXTRAVERSION = -pf9
-+NAME = Wrong Language
- 
- # *DOCUMENTATION*
- # To see a list of typical targets execute "make help"
 diff --git a/arch/powerpc/platforms/cell/spufs/sched.c b/arch/powerpc/platforms/cell/spufs/sched.c
 index 460f5f3..eeb3e32 100644
 --- a/arch/powerpc/platforms/cell/spufs/sched.c
@@ -10638,10 +10621,10 @@ index f679ae1..746dc9f 100644
  
 diff --git a/block/blk-stat.c b/block/blk-stat.c
 new file mode 100644
-index 0000000..bdb16d8
+index 0000000..f6ede16
 --- /dev/null
 +++ b/block/blk-stat.c
-@@ -0,0 +1,221 @@
+@@ -0,0 +1,229 @@
 +/*
 + * Block stat tracking code
 + *
@@ -10705,6 +10688,9 @@ index 0000000..bdb16d8
 +
 +		queue_for_each_hw_ctx(q, hctx, i) {
 +			hctx_for_each_ctx(hctx, ctx, j) {
++				blk_stat_flush_batch(&ctx->stat[0]);
++				blk_stat_flush_batch(&ctx->stat[1]);
++
 +				if (!ctx->stat[0].nr_samples &&
 +				    !ctx->stat[1].nr_samples)
 +					continue;
@@ -10750,6 +10736,8 @@ index 0000000..bdb16d8
 +	if (q->mq_ops)
 +		blk_mq_stat_get(q, dst);
 +	else {
++		blk_stat_flush_batch(&q->rq_stats[0]);
++		blk_stat_flush_batch(&q->rq_stats[1]);
 +		memcpy(&dst[0], &q->rq_stats[0], sizeof(struct blk_rq_stat));
 +		memcpy(&dst[1], &q->rq_stats[1], sizeof(struct blk_rq_stat));
 +	}
@@ -10765,6 +10753,9 @@ index 0000000..bdb16d8
 +		uint64_t newest = 0;
 +
 +		hctx_for_each_ctx(hctx, ctx, i) {
++			blk_stat_flush_batch(&ctx->stat[0]);
++			blk_stat_flush_batch(&ctx->stat[1]);
++
 +			if (!ctx->stat[0].nr_samples &&
 +			    !ctx->stat[1].nr_samples)
 +				continue;
