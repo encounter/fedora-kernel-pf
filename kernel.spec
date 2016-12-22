@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 202
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -640,17 +640,11 @@ Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
 # CVE-2016-9755 rhbz 1400904 1400905
 Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 
-# CVE-2016-8655 rhbz 1400019 1401820
-Patch857: 0001-packet-fix-race-condition-in-packet_set_ring.patch
-
-# CVE-2016-9793 rhbz 1402013 1402014
-Patch858: 0001-net-avoid-signed-overflows-for-SO_-SND-RCV-BUFFORCE.patch
-
-# CVE-2016-9576 rhbz 1403145 1403146
-Patch859: 0001-Don-t-feed-anything-but-regular-iovec-s-to-blk_rq_ma.patch
+# CVE-2016-9588 rhbz 1404924 1404925
+Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.13.patch
+Patch999: pf-kernel-4.8.15.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2179,6 +2173,15 @@ fi
 #
 # 
 %changelog
+* Thu Dec 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.15-200
+- Linux v4.8.15
+- CVE-2016-9588 fix possible DoS in nVMX (rhbz 1404924 1404925)
+- Turn off CONFIG_IWLWIFI_PCIE_RTPM as it can cause wifi disconnects
+
+* Mon Dec 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.14-200
+- Linux v4.8.14
+- CVE-2016-8399 Fix out OOB stack read in memcpy_fromiovec (rhbz 1403833 1403834)
+
 * Fri Dec 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.13-200
 - Linux v4.8.13
 - CVE-2016-9576 fix use after free in SCSI generic device interface (rhbz 1403145 1403146)
