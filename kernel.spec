@@ -649,7 +649,7 @@ Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.13.patch
+Patch999: pf-kernel-4.8.15.patch
 
 # END OF PATCH DEFINITIONS
 
