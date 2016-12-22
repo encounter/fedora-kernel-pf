@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -641,7 +641,7 @@ Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.13.patch
+Patch999: pf-kernel-4.8.15.patch
 
 # END OF PATCH DEFINITIONS
 
