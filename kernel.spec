@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -649,7 +649,7 @@ Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.15.patch
+Patch999: pf-kernel-4.8.16.patch
 
 # END OF PATCH DEFINITIONS
 
