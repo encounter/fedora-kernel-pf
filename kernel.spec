@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 202
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -644,7 +644,7 @@ Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.15.patch
+Patch999: pf-kernel-4.8.16.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2173,6 +2173,9 @@ fi
 #
 # 
 %changelog
+* Fri Jan 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.16-200
+- Linux v4.8.16
+
 * Thu Dec 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.15-200
 - Linux v4.8.15
 - CVE-2016-9588 fix possible DoS in nVMX (rhbz 1404924 1404925)
