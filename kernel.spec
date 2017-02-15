@@ -644,7 +644,7 @@ Patch856: drm-radeon-update-smc-firmware-selection-for-si.patch
 Patch857: k8s-fix.patch
 
 #pf-kernel
-Patch999: pf-kernel-4.8.16.patch
+Patch999: pf-kernel-4.9.4.patch
 
 # END OF PATCH DEFINITIONS
 
