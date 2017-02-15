@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -513,6 +513,8 @@ Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # Fix OMAP4 (pandaboard)
 Patch427: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
+Patch428: arm64-dma-mapping-Fix-dma_mapping_error-when-bypassing-SWIOTLB.patch
+
 # Not particularly happy we don't yet have a proper upstream resolution this is the right direction
 # https://www.spinics.net/lists/arm-kernel/msg535191.html
 Patch429: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
@@ -522,12 +524,12 @@ Patch430: ARM-tegra-usb-no-reset.patch
 
 Patch431: bcm2837-initial-support.patch
 
-Patch432: bcm283x-vc4-fixes.patch
-
-Patch433: bcm283x-fixes.patch
+Patch432: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
 
 # http://www.spinics.net/lists/linux-mmc/msg41151.html
-Patch434: bcm283x-mmc-imp-speed.patch
+Patch433: bcm283x-mmc-imp-speed.patch
+
+Patch434: mm-alloc_contig-re-allow-CMA-to-compact-FS-pages.patch
 
 Patch440: AllWinner-net-emac.patch
 
@@ -625,23 +627,30 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
 
-# Work around thinkpad firmware memory layout issues and efi_mem_reserve()
-Patch850: 0001-efi-prune-invalid-memory-map-entries.patch
-
 # Request from dwalsh
 Patch851: selinux-namespace-fix.patch
 
 #rhbz 1390308
 Patch852: nouveau-add-maxwell-to-backlight-init.patch
 
-# Possible ATI fixes?
-Patch853: drm-amdgpu-drop-verde-dpm-quirks.patch
-Patch854: drm-amdgpu-update-si-kicker-smc-firmware.patch
-Patch855: drm-radeon-drop-verde-dpm-quirks.patch
-Patch856: drm-radeon-update-smc-firmware-selection-for-si.patch
+# CVE-2017-2596 rhbz 1417812 1417813
+Patch855: kvm-fix-page-struct-leak-in-handle_vmon.patch
 
-#rhbz 1414068
-Patch857: k8s-fix.patch
+#CVE-2017-5897 rhbz 1419848 1419851
+Patch857: ip6_gre-fix-ip6gre_err-invalid-reads.patch
+
+#rhbz 1417829
+Patch858: 1-2-media-cxusb-Use-a-dma-capable-buffer-also-for-reading.patch
+Patch859: 2-2-media-dvb-usb-firmware-don-t-do-DMA-on-stack.patch
+
+#rhbz 1420276
+Patch860: 0001-sctp-avoid-BUG_ON-on-sctp_wait_for_sndbuf.patch
+
+#rhbz 1415397
+Patch861: w1-ds2490-USB-transfer-buffers-need-to-be-DMAable.patch
+
+#CVE-2017-5970 rhbz 1421638
+Patch862: ipv4-keep-skb-dst-around-in-presence-of-IP-options.patch
 
 #pf-kernel
 Patch999: pf-kernel-4.9.4.patch
@@ -2193,6 +2202,65 @@ fi
 #
 #
 %changelog
+* Tue Feb 14 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5967 Disable CONFIG_TIMER_STATS (rhbz 1422138 1422140)
+
+* Mon Feb 13 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5970 keep skb->dst around in presence of IP options (rhbz 1421638)
+
+* Thu Feb  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix OOPSes in vc4 (Raspberry Pi)
+
+* Thu Feb 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.9-200
+- Linux v4.9.9
+- Fix DMA on stack from 1-wire driver (rhbz 1415397)
+
+* Thu Feb  9 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- sctp: avoid BUG_ON on sctp_wait_for_sndbuf (rhbz 1420276)
+
+* Tue Feb  7 2017 Laura Abbott <labbott@fedoraproject.org>
+- Fix for some DMA on stack with DVB devices (rhbz 1417829)
+- Enable CONFIG_SENSORS_JC42 (rhbz 1417454)
+
+* Tue Feb  7 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5897 ip6_gre: Invalid reads in ip6gre_err (rhbz 1419848 1419851)
+
+* Tue Feb  7 2017 Peter Robinson <pbrobinson@fedoraproject.org> 4.9.8-201
+- Drop "fixes" for bcm238x as they seem to break other Raspberry Pi 3 things
+
+* Mon Feb 06 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.8-200
+- Linux v4.9.8
+
+* Thu Feb 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.7-201
+- Fix for pcie_aspm_init_link_state crash (rhbz 1418858)
+
+* Thu Feb 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.7-200
+- Linux v4.9.7
+
+* Tue Jan 31 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix kvm nested virt CVE-2017-2596 (rhbz 1417812 1417813)
+
+* Tue Jan 31 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix CMA compaction regression (Raspberry Pi and others)
+
+* Thu Jan 26 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- arm64: dma-mapping: Fix dma_mapping_error() when bypassing SWIOTLB
+
+* Thu Jan 26 2017 Laura Abbott <labbott@redhat.com> - 4.9.6-200
+- Linux v4.9.6
+- Bring in fix for bogus EFI firmware
+- Fixes CVE-2017-5547, CVE-2016-10153, CVE-2017-5548, CVE-2017-5551
+  (rhbz 1416096 1416101 1416110 1416126 1416128)
+
+* Wed Jan 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5576 CVE-2017-5577 vc4 overflows (rhbz 1416436 1416437 1416439)
+
+* Mon Jan 23 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Enable CONFIG_IPV6_GRE (rhbz 1405398)
+
+* Fri Jan 20 2017 Laura Abbott <labbott@redhat.com> - 4.9.5-200
+- Linux v4.9.5
+
 * Tue Jan 17 2017 Laura Abbott <labbott@fedoraproject.org>
 - Fix kubernetes networking issue (rhbz 1414068)
 
